@@ -1,8 +1,18 @@
 [
   {
     "name": "gg_name",
+    "category": "gg_category",
     "description": "gg_description",
     "value": 1,
-    "category": "gg_category"
+    "flag": "gg_flag",
+    "tag": "gg_tag"
+  },
+  {
+    "name": "hh_name",
+    "category": "gg_category",
+    "description": "hh_description",
+    "value": 1,
+    "flag": "hh_flag",
+    "tag": "hh_tag"
   }
 ]
