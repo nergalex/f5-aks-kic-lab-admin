@@ -1,10 +1,10 @@
----
-- name: gg
-  description: gg
-  max_attempts: 0
-  value: gg
-  category: gg
-  type: gg
-  state: gg
-  requirements:
-    gg: gg
+[
+  {
+    "name": "gg_name",
+    "description": "gg_description",
+    "value": "gg_value",
+    "category": "gg_category",
+    "type": "gg_type",
+    "state": "gg_state"
+  }
+]
