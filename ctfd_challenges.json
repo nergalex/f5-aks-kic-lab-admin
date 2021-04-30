@@ -3,6 +3,6 @@
     "name": "gg_name",
     "description": "gg_description",
     "value": 1,
-    "category": "gg_category",
+    "category": "gg_category"
   }
 ]
