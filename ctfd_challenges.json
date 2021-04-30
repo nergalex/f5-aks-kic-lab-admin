@@ -2,9 +2,7 @@
   {
     "name": "gg_name",
     "description": "gg_description",
-    "value": "gg_value",
+    "value": 1,
     "category": "gg_category",
-    "type": "gg_type",
-    "state": "gg_state"
   }
 ]
