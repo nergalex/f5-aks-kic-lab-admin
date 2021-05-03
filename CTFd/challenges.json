@@ -8,11 +8,11 @@
     "tag": "gg_tag"
   },
   {
-    "name": "hh_name",
-    "category": "gg_category",
-    "description": "hh_description",
+    "name": "Exemple",
+    "category": "Lab-2",
+    "description": "c'est la question",
     "value": 1,
-    "flag": "hh_flag",
-    "tag": "hh_tag"
+    "flag": "c'est la réponse",
+    "tag": "thème."
   }
 ]
