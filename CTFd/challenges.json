@@ -1,18 +1,306 @@
 [
   {
-    "name": "gg_name",
-    "category": "gg_category",
-    "description": "gg_description",
+    "name": "3.1",
+    "category": "lab 1 - Ingress | Infrastructure",
+    "description": "What is the version of deployed IC?",
     "value": 1,
-    "flag": "gg_flag",
-    "tag": "gg_tag"
+    "flag": "1.11.1",
+    "tag": "lab1"
   },
   {
-    "name": "hh_name",
-    "category": "gg_category",
-    "description": "hh_description",
+    "name": "3.2",
+    "category": "lab 1 - Ingress | Infrastructure",
+    "description": "What is the ingress-class name of the IC instance accessible from Internet?",
+    "value": 2,
+    "flag": "nginx-external",
+    "tag": "lab1"
+  },
+  {
+    "name": "3.3",
+    "category": "lab 1 - Ingress | Infrastructure",
+    "description": "What is the Helm configuration parameter to limit Namespace(s) to watch?",
+    "value": 5,
+    "flag": "controller.watchNamespace",
+    "tag": "lab1"
+  },
+  {
+    "name": "5.1",
+    "category": "lab 1 - Ingress | Infrastructure",
+    "description": "What is the cipher suite supported?",
+    "value": 2,
+    "flag": "ECDHE-RSA-AES256-GCM-SHA384",
+    "tag": "lab1"
+  },
+  {
+    "name": "6.1",
+    "category": "lab 1 - Ingress | Infrastructure",
+    "description": "Which build of NGINX is used by IC?",
     "value": 1,
-    "flag": "hh_flag",
-    "tag": "hh_tag"
+    "flag": "nginx-plus-r23",
+    "tag": "lab1"
+  },
+  {
+    "name": "1.1",
+    "category": "lab 1 - Ingress | Arcadia",
+    "description": "What is the cookie name that allow a login user to persist his session on Money Transfer micro-service of Arcadia across multiple ICs?",
+    "value": 1,
+    "flag": "arcadia_app2",
+    "tag": "lab1"
+  },
+  {
+    "name": "2.1",
+    "category": "lab 1 - Ingress | Arcadia",
+    "description": "What is the nginx directive seen in configuration for snippet proxy_ignore_headers?",
+    "value": 1,
+    "flag": "proxy_ignore_headers",
+    "tag": "lab1"
+  },
+  {
+    "name": "2a.1",
+    "category": "lab 2a - Introduction",
+    "description": "What kind of K8S Resource Definition can be used with NGINX+ for simplicity and advanced configuration of load balancing?",
+    "value": 1,
+    "flag": "CRD",
+    "tag": "lab2"
+  },
+  {
+    "name": "2a.2",
+    "category": "lab 2a - Introduction",
+    "description": "What is the name of the Custom Resource used for Advanced load balancing configuration and used as an alternative to the Ingress resource?",
+    "value": 1,
+    "flag": "VirtualServer",
+    "tag": "lab2"
+  },
+  {
+    "name": "2b.1",
+    "category": "lab 2b: Content-Based Routing",
+    "description": "What is the name of the field (in the specification of the VirtualServer CRD) which is used to select a certificate/key for decrypting TLS traffic?",
+    "value": 1,
+    "flag": "tls",
+    "tag": "lab2"
+  },
+  {
+    "name": "2b.2",
+    "category": "lab 2b: Content-Based Routing",
+    "description": "What is the name of the field (in the specification of the VirtualServer CRD) which is used to defines rules content-based load balancing?",
+    "value": 1,
+    "flag": "route",
+    "tag": "lab2"
+  },
+  {
+    "name": "2c.1",
+    "category": "lab 2c: Traffic Splitting",
+    "description": "What is the name of the action which forwards requests to an upstream?",
+    "value": 1,
+    "flag": "pass",
+    "tag": "lab2"
+  },
+  {
+    "name": "2c.2",
+    "category": "lab 2c: Traffic Splitting",
+    "description": "What is the name of the action which replies a preconfigured response?",
+    "value": 1,
+    "flag": "return",
+    "tag": "lab2"
+  },
+  {
+    "name": "2c.3",
+    "category": "lab 2c: Traffic Splitting",
+    "description": "What is the name of the action which passes requests to an upstream with the ability to modify the request/response (for example, rewrite the URI or modify the headers)?",
+    "value": 1,
+    "flag": "proxy",
+    "tag": "lab2"
+  },
+  {
+    "name": "2c.4",
+    "category": "lab 2c: Traffic Splitting",
+    "description": "What is the name of the action which redirects requests to a provided URL?",
+    "value": 1,
+    "flag": "redirect",
+    "tag": "lab2"
+  },
+  {
+    "name": "2.1",
+    "category": "lab 3 - WAF | Ingress | Arcadia",
+    "description": "What is the name of Threat Campaigns package?",
+    "value": 2,
+    "flag": "app-protect-threat-campaigns",
+    "tag": "lab3"
+  },
+  {
+    "name": "2.2",
+    "category": "lab 3 - WAF | Ingress | Arcadia",
+    "description": "How many signature attack update were released in April?",
+    "value": 2,
+    "flag": "10",
+    "tag": "lab3"
+  },
+  {
+    "name": "2.3",
+    "category": "lab 3 - WAF | Ingress | Arcadia",
+    "description": "Which request type are logged by App Protect for Arcadia application?",
+    "value": 1,
+    "flag": "all",
+    "tag": "lab3"
+  },
+  {
+    "name": "3.1",
+    "category": "lab 3 - WAF | Ingress | Arcadia",
+    "description": "What is the policy name?",
+    "value": 3,
+    "flag": "generic-security-level-low",
+    "tag": "lab3"
+  },
+  {
+    "name": "3.2",
+    "category": "lab 3 - WAF | Ingress | Arcadia",
+    "description": "What is the client_class for curl?",
+    "value": 3,
+    "flag": "Untrusted Bot",
+    "tag": "lab3"
+  },
+  {
+    "name": "3.3",
+    "category": "lab 3 - WAF | Ingress | Arcadia",
+    "description": "Which violations are raised?",
+    "value": 3,
+    "flag": "Illegal meta character in value, Attack signature detected, Violation Rating Threat detected, Bot Client Detected",
+    "tag": "lab3"
+  },
+  {
+    "name": "3.4",
+    "category": "lab 3 - WAF | Ingress | Arcadia",
+    "description": "Which attack signatures are detected?",
+    "value": 3,
+    "flag": "200001475, 200000098",
+    "tag": "lab3"
+  },
+  {
+    "name": "5.1",
+    "category": "lab 3 - WAF | Ingress | Arcadia",
+    "description": "What is the violation rating?",
+    "value": 3,
+    "flag": "3",
+    "tag": "lab3"
+  },
+  {
+    "name": "5.2",
+    "category": "lab 3 - WAF | Ingress | Arcadia",
+    "description": "What are the violations?",
+    "value": 1,
+    "flag": "Illegal meta character in value, Bot Client Detected",
+    "tag": "lab3"
+  },
+  {
+    "name": "6.1",
+    "category": "lab 3 - WAF | Ingress | Arcadia",
+    "description": "What is the bot anomaly?",
+    "value": 3,
+    "flag": "Search Engine Verification Failed",
+    "tag": "lab3"
+  },
+  {
+    "name": "6.2",
+    "category": "lab 3 - WAF | Ingress | Arcadia",
+    "description": "What is the client class?",
+    "value": 3,
+    "flag": "Malicious Bot",
+    "tag": "lab3"
+  },
+  {
+    "name": "1.1",
+    "category": "lab 3 - WAF | VirtualServer(Route) - Cafe",
+    "description": "What is the waf policy name that protects /tea?",
+    "value": 2,
+    "flag": "waf-cafe-tea",
+    "tag": "lab3"
+  },
+  {
+    "name": "1.2",
+    "category": "lab 3 - WAF | VirtualServer(Route) - Cafe",
+    "description": "In which namespace are located all APPolicies?",
+    "value": 5,
+    "flag": "external-ingress-controller",
+    "tag": "lab3"
+  },
+  {
+    "name": "2.1",
+    "category": "lab 3 - WAF | VirtualServer(Route) - Cafe",
+    "description": "Which App Protect policy name protects /return_page?",
+    "value": 5,
+    "flag": "external-ingress-controller_generic-security-level-low",
+    "tag": "lab3"
+  },
+  {
+    "name": "2.2",
+    "category": "lab 3 - WAF | VirtualServer(Route) - Cafe",
+    "description": "Two VirtualServerRoutes in same namespace can reference same WAF policy. Is it true?",
+    "value": 1,
+    "flag": "yes",
+    "tag": "lab3"
+  },
+  {
+    "name": "2.3",
+    "category": "lab 3 - WAF | VirtualServer(Route) - Cafe",
+    "description": "Two VirtualServerRoutes in 2 namespaces can reference same WAF policy in another nameSpace. Is it true?",
+    "value": 1,
+    "flag": "yes",
+    "tag": "lab3"
+  },
+  {
+    "name": "2.1",
+    "category": "lab 4 - API GW & WAAP | Sentence app",
+    "description": "What is the URI that publish Public Key used by IC to check signature of JWT?",
+    "value": 3,
+    "flag": "https://dev-431905.okta.com/oauth2/aus2zvhijqcz1rlq84x7/v1/keys",
+    "tag": "lab4"
+  },
+  {
+    "name": "2.2",
+    "category": "lab 4 - API GW & WAAP | Sentence app",
+    "description": "What is the secret length in bytes?",
+    "value": 5,
+    "flag": "40",
+    "tag": "lab4"
+  },
+  {
+    "name": "4.1",
+    "category": "lab 4 - API GW & WAAP | Sentence app",
+    "description": "In parameters of the request, what is the PATH of the redirect uri?",
+    "value": 2,
+    "flag": "/_codexch",
+    "tag": "lab4"
+  },
+  {
+    "name": "4.2",
+    "category": "lab 4 - API GW & WAAP | Sentence app",
+    "description": "What is the cookie name for which the value will be exchanged for the ID Token in the key-value store?",
+    "value": 2,
+    "flag": "auth_token",
+    "tag": "lab4"
+  },
+  {
+    "name": "5.1",
+    "category": "lab 4 - API GW & WAAP | Sentence app",
+    "description": "For /colors/{id} endpoint, what is the defined type for parameter name 'id'?",
+    "value": 3,
+    "flag": "integer",
+    "tag": "lab4"
+  },
+  {
+    "name": "5.2",
+    "category": "lab 4 - API GW & WAAP | Sentence app",
+    "description": "What is the violation raised for request /colors/tata?",
+    "value": 2,
+    "flag": "Illegal parameter data type",
+    "tag": "lab4"
+  },
+  {
+    "name": "8.1",
+    "category": "lab 4 - API GW & WAAP | Sentence app",
+    "description": "What is the rate limit threshold per second allowed in this configuration? (3 decimal places)",
+    "value": 1,
+    "flag": "0.083",
+    "tag": "lab4"
   }
 ]
