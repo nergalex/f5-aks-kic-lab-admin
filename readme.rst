@@ -1,7 +1,6 @@
-What are modern tools:
-   - `Red Hat Ansible Tower <https://www.ansible.com/products/tower>`_ as Automation Platform
+`User guide <https://f5-k8s-ctfd.docs.emea.f5se.com/>`_
 
-What is a modern environment:
+   - `Red Hat Ansible Tower <https://www.ansible.com/products/tower>`_ as Automation Platform
    - `Azure Kubernetes Service <https://azure.microsoft.com/en-us/services/kubernetes-service/>`_
    - `Azure Container Registry <https://azure.microsoft.com/en-us/services/container-registry/>`_
    - `Github as code repository <https://azure.microsoft.com/en-us/products/github/>`_
