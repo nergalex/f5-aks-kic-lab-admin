@@ -84,7 +84,7 @@
     "category": "lab 2b: Content-Based Routing",
     "description": "What is the name of the field (in the specification of the VirtualServer CRD) which is used to defines rules content-based load balancing?",
     "value": 1,
-    "flag": "route",
+    "flag": "routes",
     "tag": "lab2"
   },
   {
