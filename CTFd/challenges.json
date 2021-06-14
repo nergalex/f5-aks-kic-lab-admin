@@ -56,7 +56,7 @@
     "tag": "lab1"
   },
   {
-    "name": "2a.1",
+    "name": "1.1",
     "category": "lab 2a - Introduction",
     "description": "What kind of K8S Resource Definition can be used with NGINX+ for simplicity and advanced configuration of load balancing?",
     "value": 1,
@@ -76,7 +76,7 @@
     "category": "lab 2b: Content-Based Routing",
     "description": "What is the name of the field (in the specification of the VirtualServer CRD) which is used to select a certificate/key for decrypting TLS traffic?",
     "value": 1,
-    "flag": "tls",
+    "flag": "secret",
     "tag": "lab2"
   },
   {
