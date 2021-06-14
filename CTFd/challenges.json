@@ -76,7 +76,7 @@
     "category": "lab 2b: Content-Based Routing",
     "description": "What is the name of the field (in the specification of the VirtualServer CRD) which is used to select a certificate/key for decrypting TLS traffic?",
     "value": 1,
-    "flag": "secret",
+    "flag": "tls",
     "tag": "lab2"
   },
   {
