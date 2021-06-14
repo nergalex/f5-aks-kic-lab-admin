@@ -57,66 +57,82 @@
   },
   {
     "name": "1.1",
-    "category": "lab 2a - Introduction",
+    "category": "lab 2 - Basic Content-Based Routing",
     "description": "What kind of K8S Resource Definition can be used with NGINX+ for simplicity and advanced configuration of load balancing?",
     "value": 1,
     "flag": "CRD",
     "tag": "lab2"
   },
   {
-    "name": "2a.2",
-    "category": "lab 2a - Introduction",
-    "description": "What is the name of the Custom Resource used for Advanced load balancing configuration and used as an alternative to the Ingress resource?",
+    "name": "1.2",
+    "category": "lab 2 - Basic Content-Based Routing",
+    "description": "What is the name of the CRD used for Advanced load balancing configuration and used as an alternative to the Ingress resource?",
     "value": 1,
     "flag": "VirtualServer",
     "tag": "lab2"
   },
   {
-    "name": "2b.1",
-    "category": "lab 2b: Content-Based Routing",
-    "description": "What is the name of the field (in the specification of the VirtualServer CRD) which is used to select a certificate/key for decrypting TLS traffic?",
+    "name": "1.3",
+    "category": "lab 2 - Basic Content-Based Routing",
+    "description": "What is the name of the field (in the specification of the VirtualServer CRD) which is used to implement SSL Offloading?",
     "value": 1,
     "flag": "tls",
     "tag": "lab2"
   },
   {
-    "name": "2b.2",
-    "category": "lab 2b: Content-Based Routing",
-    "description": "What is the name of the field (in the specification of the VirtualServer CRD) which is used to defines rules content-based load balancing?",
+    "name": "1.4",
+    "category": "lab 2 - Basic Content-Based Routing",
+    "description": "What is the name of the field (in the specification of the VirtualServer CRD) which is used to defines a rule of content-based load balancing?",
     "value": 1,
-    "flag": "routes",
+    "flag": "route",
     "tag": "lab2"
   },
   {
-    "name": "2c.1",
-    "category": "lab 2c: Traffic Splitting",
+    "name": "2.1",
+    "category": "lab 2 - Advanced Content-Based Routing",
     "description": "What is the name of the action which forwards requests to an upstream?",
     "value": 1,
     "flag": "pass",
     "tag": "lab2"
   },
   {
-    "name": "2c.2",
-    "category": "lab 2c: Traffic Splitting",
+    "name": "2.2",
+    "category": "lab 2 - Advanced Content-Based Routing",
     "description": "What is the name of the action which replies a preconfigured response?",
     "value": 1,
     "flag": "return",
     "tag": "lab2"
   },
   {
-    "name": "2c.3",
-    "category": "lab 2c: Traffic Splitting",
+    "name": "2.3",
+    "category": "lab 2 - Advanced Content-Based Routing",
     "description": "What is the name of the action which passes requests to an upstream with the ability to modify the request/response (for example, rewrite the URI or modify the headers)?",
     "value": 1,
     "flag": "proxy",
     "tag": "lab2"
   },
   {
-    "name": "2c.4",
-    "category": "lab 2c: Traffic Splitting",
+    "name": "2.4",
+    "category": "lab 2 - Advanced Content-Based Routing",
     "description": "What is the name of the action which redirects requests to a provided URL?",
     "value": 1,
     "flag": "redirect",
+    "tag": "lab2"
+  },
+  {
+    "name": "3.1",
+    "category": "lab 2 - Canary or A/B Testing",
+    "description": "What is the name of the field (in the specification of the VirtualServer CRD) which is used to setup canary or A/B testing?",
+    "value": 1,
+    "flag": "splits",
+    "tag": "lab2"
+  },
+  {
+    "name": "3.2",
+    "category": "lab 2 - Canary or A/B Testing",
+    "description": "What is the name of the field which allow to define a percentage of traffic as part of the splits configuration?",
+    "value": 1,
+    "flag": "weight",
     "tag": "lab2"
   },
   {
