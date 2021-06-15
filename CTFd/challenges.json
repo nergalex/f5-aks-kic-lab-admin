@@ -24,7 +24,7 @@
     "tag": "lab1"
   },
   {
-    "name": "6.1",
+    "name": "2.1",
     "category": "lab 1 - Ingress | Infrastructure",
     "description": "Which build of NGINX is used by IC?",
     "value": 1,
@@ -34,7 +34,7 @@
   {
     "name": "1.1",
     "category": "lab 1 - Ingress | Arcadia",
-    "description": "What is the cookie name that allow a login user to persist his session on Money Transfer micro-service of Arcadia across multiple ICs?",
+    "description": "What is the cookie name that allows a login user to persist his session on Money Transfer micro-service of Arcadia across multiple ICs?",
     "value": 1,
     "flag": "arcadia-app2",
     "tag": "lab1"
@@ -128,6 +128,14 @@
     "tag": "lab2"
   },
   {
+    "name": "1.1",
+    "category": "lab 3 - WAF | Infrastructure",
+    "description": "What is the cipher suite supported?",
+    "value": 2,
+    "flag": "ECDHE-RSA-AES256-GCM-SHA384",
+    "tag": "lab1"
+  },
+  {
     "name": "2.1",
     "category": "lab 3 - WAF | Ingress | Arcadia",
     "description": "What is the name of Threat Campaigns package?",
@@ -142,14 +150,6 @@
     "value": 2,
     "flag": "10",
     "tag": "lab3"
-  },
-  {
-    "name": "1.1",
-    "category": "lab 3 - WAF | Infrastructure",
-    "description": "What is the cipher suite supported?",
-    "value": 2,
-    "flag": "ECDHE-RSA-AES256-GCM-SHA384",
-    "tag": "lab1"
   },
   {
     "name": "2.3",
