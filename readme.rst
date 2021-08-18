@@ -22,8 +22,10 @@ Deployment
 
 Common platform
 =========================================
-Before deploying a lab, deploy a platform per student.
-Launch the workflow template ``wf-aks-create-infra`` that includes Job templates:
+Deploy a platform per student.
+Launch the workflow template ``wf-aks-create-infra`` and fulfill the survey.
+
+For information, the workflow does:
 
 =============================================================   =============================================       =============================================   =============================================   =============================================   =============================================
 Job template                                                    objective                                           playbook                                        activity or play targeted in role               inventory                                       credential
@@ -34,7 +36,7 @@ Job template                                                    objective       
 ``poc-azure-create-vm-jumphost``                                Create an Linux host as Jumphost                    ``playbooks/poc-azure.yaml``                    ``create-vm-jumphost``                          CMP_inv_CloudBuilderf5                          <Service Principal>
 ``poc-aks-get-cluster_info``                                    Get kubeconfig                                      ``playbooks/poc-aks.yaml``                      ``get-cluster_info``                            CMP_inv_CloudBuilderf5                          <Service Principal>
 ``poc-azure-get-vm-jumphost``                                   Get Public IP of Jumphost                           ``playbooks/poc-azure.yaml``                    ``get-vm-jumphost``                             CMP_inv_CloudBuilderf5                          <Service Principal>
-``poc-k8s-copy_kubeconfig``                                     Copy kubeconfig on Jumphost                         ``playbooks/poc-k8s_jumphost.yaml``             ``copy_kubeconfig``                             CMP_inv_CloudBuilderf5                          <Service Principal>
+``poc-k8s-copy_kubeconfig``                                     Copy kubeconfig on Jumphost                         ``playbooks/poc-k8s_jumphost.yaml``             ``copy_kubeconfig``                             localhost                                       f5-k8s-ctfd-jumphost
 =============================================================   =============================================       =============================================   =============================================   =============================================   =============================================
 
 ==============================================  =============================================
@@ -52,8 +54,10 @@ Extra variable                                  Description
 
 Infra Ingress Controller
 =========================================
-Before deploying a lab, deploy an Ingress Controller.
-Launch the workflow template ``wf-k8s-infra-create-ingress-controller`` that includes Job templates:
+Deploy an Ingress Controller.
+Launch the workflow template ``wf-k8s-infra-create-ingress-controller`` and fulfill the survey.
+
+For information, the workflow does:
 
 =============================================================   =============================================       =============================================   =============================================   =============================================   =============================================
 Job template                                                    objective                                           playbook                                        activity or play targeted in role               inventory                                       credential
