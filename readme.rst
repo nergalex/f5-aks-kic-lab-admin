@@ -62,7 +62,7 @@ Extra variable                                  Description
         - 10.0.0.0/8
       name: jumphost
       vm_size: Standard_DS1_v2
-    extra_k8s_version: 1.12.1
+    extra_k8s_version: 1.21.2
     extra_location: eastus2
     extra_owner_email: me@acme.com
     extra_platform_tags: environment=labSE project=CloudBuilder
