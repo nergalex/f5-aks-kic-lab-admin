@@ -53,6 +53,7 @@ Extra variable                                  Description
 ==============================================  =============================================
 
 .. code-block:: yaml
+
     extra_admin_username: cyber
     extra_app_vm_size: Standard_B2ms
     extra_hub_name: MyHub
@@ -105,7 +106,6 @@ extra_namespace                                 External (ELB) or Internal (ILB)
 extra_wildcard_tls_crt                          CRT used when no NGINX Sever block match
 extra_wildcard_tls_key                          KEY used when no NGINX Sever block match
 ==============================================  =============================================
-
 
 .. code-block:: yaml
 
