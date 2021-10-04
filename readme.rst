@@ -106,6 +106,7 @@ extra_wildcard_tls_crt                          CRT used when no NGINX Sever blo
 extra_wildcard_tls_key                          KEY used when no NGINX Sever block match
 ==============================================  =============================================
 
+
 .. code-block:: yaml
 
     extra_app:
