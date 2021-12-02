@@ -1,4 +1,4 @@
-NGINX Ingress Controller workshop - admin guide
+NGINX workshop - admin guide
 ##############################################################
 Thank you for your interest in *NGINX Ingress Controller workshop*.
 *NGINX Ingress Controller workshop* is a F5 community lab that helps DevSecOps teams manage NGINX Ingress Controller deployments by adding control, visibility and security to their Apps.
