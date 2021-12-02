@@ -1,0 +1,9 @@
+{
+  "metadata": {
+    "name": "lab_k8s_{{ extra_volterra_site_id }}",
+    "displayName": "site{{ extra_volterra_site_id }} - managed WAAP",
+    "description": "On Premise and multi-cloud",
+    "tags": ["site{{ extra_volterra_site_id }}"]
+  },
+  "desiredState": {}
+}

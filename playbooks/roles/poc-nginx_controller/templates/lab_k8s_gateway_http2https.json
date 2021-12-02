@@ -1,0 +1,24 @@
+{
+  "metadata": {
+    "name": "lab_k8s_{{ extra_volterra_site_id }}_http2https",
+    "displayName": "generic http2https",
+    "description": "Redirect HTTP to HTTPS",
+    "tags": ["site{{ extra_volterra_site_id }}"]
+  },
+  "desiredState": {
+    "ingress": {
+      "uris": {
+        "http://.*.{{ extra_app.domain }}": {
+          "matchMethod": "REGEX"
+        }
+      },
+      "placement": {
+        "instanceGroupRefs": [
+          {
+            "ref": "/infrastructure/instance-groups/lab_k8s_{{ extra_volterra_site_id }}"
+          }
+        ]
+      }
+    }
+  }
+}

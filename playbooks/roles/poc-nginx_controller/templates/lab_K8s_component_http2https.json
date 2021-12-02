@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "name": "lab_k8s_{{ extra_volterra_site_id }}_http2https",
+    "displayName": "main",
+    "description": "Redirect HTTP to HTTPS",
+    "tags": ["site{{ extra_volterra_site_id }}"]
+  },
+  "desiredState": {
+    "ingress": {
+      "uris": {
+        "/": {
+          "matchMethod": "PREFIX"
+        }
+      },
+      "gatewayRefs": [
+        {
+          "ref": "/services/environments/lab_k8s_{{ extra_volterra_site_id }}/gateways/lab_k8s_{{ extra_volterra_site_id }}_http2https"
+        }
+      ]
+    },
+    "backend": {
+      "ntlmAuthentication": "DISABLED",
+      "preserveHostHeader": "DISABLED"
+    },
+    "programmability": {
+      "uriRedirects": [
+        {
+          "responseCode": 301,
+          "url": "https://$host$request_uri"
+        }
+      ]
+    },
+    "logging": {
+      "accessLog": {
+        "state": "DISABLED"
+      },
+      "errorLog": "DISABLED"
+    },
+    "security": {
+      "strategyRef": {
+        "ref": "/security/strategies/balanced_default"
+      },
+      "waf": {
+        "isEnabled": false
+      }
+    }
+  }
+}

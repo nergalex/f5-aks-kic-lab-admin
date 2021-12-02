@@ -1,0 +1,19 @@
+{
+  "metadata": {
+    "name": "site{{ extra_volterra_site_id }}_waap_managed",
+    "displayName": "site{{ extra_volterra_site_id }} - NameSpace waap-managed",
+    "description": "Lab K8S - AKS cluster",
+    "tags": ["site{{ extra_volterra_site_id }}"]
+  },
+  "desiredState": {
+    "type": "OTHER_LOCATION"
+  }
+}
+
+
+
+
+
+
+
+

@@ -1,0 +1,38 @@
+- name: Retrieve the NGINX Controller auth token
+  include_role:
+    name: nginxinc.nginx_controller_generate_token
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller.ip}}"
+    nginx_controller_user_email: "{{extra_nginx_controller.username}}"
+    nginx_controller_user_password: "{{extra_nginx_controller.password}}"
+
+- name: Get the NGINX Plus certificate and key bundle
+  uri:
+    url: "https://{{ extra_nginx_controller.ip }}/api/v1/platform/licenses/nginx-plus-licenses/controller-provided"
+    method: GET
+    headers:
+      Content-Type: application/json
+      Cookie: "{{ nginx_controller_auth_token }}"
+    return_content: yes
+    validate_certs: no
+    status_code: 200, 201, 202
+  register: var_nginx_keys
+
+- name: Get controller api key for agent registration
+  uri:
+    url: "https://{{ extra_nginx_controller.ip }}/api/v1/platform/global"
+    method: GET
+    headers:
+      Cookie: "{{ nginx_controller_auth_token }}"
+    return_content: yes
+    status_code: 200
+    validate_certs: false
+  register: var_ctrl_globals
+
+- name: "Artifact for Tower Workflows"
+  set_stats:
+    data:
+      stats_nginx_key:  "{{ var_nginx_keys.json.currentStatus }}"
+      stats_api_key:  "{{var_ctrl_globals.json.currentStatus.agentSettings.apiKey}}"
+
+

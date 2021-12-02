@@ -1,0 +1,150 @@
+- name: SET var_cn
+  set_fact:
+    var_cn: "{{ extra_app.name | lower}}{{ extra_volterra_site_id }}.{{ extra_app.domain | lower}}"
+
+- name: SET SAN
+  set_fact:
+    var_san_list:
+      - "{{ var_cn }}"
+      - "beta-{{ var_cn }}"
+
+- name: Retrieve the NGINX Controller auth token
+  include_role:
+    name: nginxinc.nginx_controller_generate_token
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller.ip}}"
+    nginx_controller_user_email: "{{extra_nginx_controller.username}}"
+    nginx_controller_user_password: "{{extra_nginx_controller.password}}"
+
+- name: Create certificate
+  include_role:
+    name: nginxinc.nginx_controller_certificate
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller.ip}}"
+    nginx_controller_environmentName: "lab_k8s_{{ extra_volterra_site_id }}"
+    nginx_controller_certificate: "{{ lookup('template','lab_k8s_certificate_letsencrypt.json') }}"
+
+- name: Create generic gateway http2https
+  include_role:
+    name: nginxinc.nginx_controller_gateway
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller.ip}}"
+    nginx_controller_environmentName: "lab_k8s_{{ extra_volterra_site_id }}"
+    nginx_controller_gateway: "{{ lookup('template','lab_k8s_gateway_http2https.json') }}"
+
+- name: Create generic application http2https
+  include_role:
+    name: nginxinc.nginx_controller_application
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller.ip}}"
+    nginx_controller_environmentName: "lab_k8s_{{ extra_volterra_site_id }}"
+    nginx_controller_app:
+      metadata:
+        name: "lab_k8s_{{ extra_volterra_site_id }}_http2https"
+        displayName: "generic http2https"
+        description: "Redirect HTTP to HTTPS"
+        tags:
+          - "site{{ extra_volterra_site_id }}"
+
+- name: Create generic components http2https | generic
+  include_role:
+    name: nginxinc.nginx_controller_component
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller.ip}}"
+    nginx_controller_environmentName: "lab_k8s_{{ extra_volterra_site_id }}"
+    nginx_controller_appName: "lab_k8s_{{ extra_volterra_site_id }}_http2https"
+    nginx_controller_component: "{{ lookup('template','lab_K8s_component_http2https.json') }}"
+
+- name: Create gateway SAN
+  include_role:
+    name: nginxinc.nginx_controller_gateway
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller.ip}}"
+    nginx_controller_environmentName: "lab_k8s_{{ extra_volterra_site_id }}"
+    nginx_controller_gateway: "{{ lookup('template','lab_k8s_gateway_SAN.json') }}"
+
+- name: Create application SAN
+  include_role:
+    name: nginxinc.nginx_controller_application
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller.ip}}"
+    nginx_controller_environmentName: "lab_k8s_{{ extra_volterra_site_id }}"
+    nginx_controller_app:
+      metadata:
+        name: "lab_k8s_{{ extra_app.name | lower}}{{ extra_volterra_site_id }}.{{ extra_app.domain | lower}}_san"
+        displayName: "SAN of {{ extra_app.name | lower}}{{ extra_volterra_site_id }}.{{ extra_app.domain | lower}}"
+        description: "Redirect SAN to CN"
+        tags:
+          - "site{{ extra_volterra_site_id }}"
+
+- name: Create components SAN | generic
+  include_role:
+    name: nginxinc.nginx_controller_component
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller.ip}}"
+    nginx_controller_environmentName: "lab_k8s_{{ extra_volterra_site_id }}"
+    nginx_controller_appName: "lab_k8s_{{ extra_app.name | lower}}{{ extra_volterra_site_id }}.{{ extra_app.domain | lower}}_san"
+    nginx_controller_component: "{{ lookup('template','lab_k8s_component_SAN.json') }}"
+
+- name: Create gateway CN
+  include_role:
+    name: nginxinc.nginx_controller_gateway
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller.ip}}"
+    nginx_controller_environmentName: "lab_k8s_{{ extra_volterra_site_id }}"
+    nginx_controller_gateway: "{{ lookup('template','lab_k8s_gateway_CN.json') }}"
+
+- name: Create application CN
+  include_role:
+    name: nginxinc.nginx_controller_application
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller.ip}}"
+    nginx_controller_environmentName: "lab_k8s_{{ extra_volterra_site_id }}"
+    nginx_controller_app:
+      metadata:
+        name: "lab_k8s_{{ extra_app.name | lower}}{{ extra_volterra_site_id }}.{{ extra_app.domain | lower}}_cn"
+        displayName: "{{ extra_app.name | lower}}{{ extra_volterra_site_id }}.{{ extra_app.domain | lower}}"
+        description: "Common Name"
+        tags:
+          - "site{{ extra_volterra_site_id }}"
+
+- name: SET components CN | generic
+  set_fact:
+    var_components_generic:
+      - name: acme
+        location: /.well-known/acme-challenge
+        waf_policy:
+          name: none
+        nexthop_k8s_service:
+          name: apigw-microapigw
+          namespace: sentence-api-managed
+        monitoring: none
+      - name: security.txt
+        location: /.well-known/security.txt
+        waf_policy:
+          name: generic
+        nexthop_k8s_service:
+          name: frontend
+        monitoring: none
+
+- name: Create components CN | generic
+  include_role:
+    name: nginxinc.nginx_controller_component
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller.ip}}"
+    nginx_controller_environmentName: "lab_k8s_{{ extra_volterra_site_id }}"
+    nginx_controller_appName: "lab_k8s_{{ extra_app.name | lower}}{{ extra_volterra_site_id }}.{{ extra_app.domain | lower}}_cn"
+    nginx_controller_component: "{{ lookup('template','lab_k8s_component_cas.json') }}"
+  loop: "{{ var_components_generic }}"
+
+- name: Create components CN | App specific
+  include_role:
+    name: nginxinc.nginx_controller_component
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller.ip}}"
+    nginx_controller_environmentName: "lab_k8s_{{ extra_volterra_site_id }}"
+    nginx_controller_appName: "lab_k8s_{{ extra_app.name | lower}}{{ extra_volterra_site_id }}.{{ extra_app.domain | lower}}_cn"
+    nginx_controller_component: "{{ lookup('template','lab_k8s_component_cas.json') }}"
+  loop: "{{ extra_app.components }}"
+
+

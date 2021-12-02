@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "name": "lab_k8s_{{extra_app.name | lower}}{{ extra_volterra_site_id }}.{{extra_app.domain | lower}}_san",
+    "displayName": "SAN of {{extra_app.name | lower}}{{ extra_volterra_site_id }}.{{extra_app.domain | lower}}",
+    "description": "Redirect SAN to CN",
+    "tags": ["site{{ extra_volterra_site_id }}"]
+  },
+  "desiredState": {
+    "ingress": {
+      "uris": {
+        "/": {
+          "matchMethod": "PREFIX"
+        }
+      },
+      "gatewayRefs": [
+        {
+          "ref": "/services/environments/lab_k8s_{{ extra_volterra_site_id }}/gateways/lab_k8s_{{extra_app.name | lower}}{{ extra_volterra_site_id }}.{{extra_app.domain | lower}}_san"
+        }
+      ]
+    },
+    "backend": {
+      "ntlmAuthentication": "DISABLED",
+      "preserveHostHeader": "DISABLED"
+    },
+    "programmability": {
+      "uriRedirects": [
+        {
+          "responseCode": 301,
+          "url": "https://{{ var_cn }}$request_uri"
+        }
+      ]
+    },
+    "logging": {
+      "accessLog": {
+        "state": "DISABLED"
+      },
+      "errorLog": "DISABLED"
+    },
+    "security": {
+      "strategyRef": {
+        "ref": "/security/strategies/balanced_default"
+      },
+      "waf": {
+        "isEnabled": false
+      }
+    }
+  }
+}

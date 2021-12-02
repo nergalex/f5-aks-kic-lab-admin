@@ -1,0 +1,13 @@
+{
+  "metadata": {
+    "name": "crt_{{extra_app.name | lower}}{{ extra_volterra_site_id }}.{{extra_app.domain | lower}}",
+    "displayName": "{{extra_app.name | lower}}{{ extra_volterra_site_id }}.{{extra_app.domain | lower}}",
+    "description": "Lets Encrypt",
+    "tags": ["site{{ extra_volterra_site_id }}"]
+  },
+  "desiredState": {
+    "type": "PEM",
+    "privateKey": "{%- for line in stats_key.split('\n') -%}{{ line }}{%- if not loop.last -%}\n{% endif %}{%- endfor -%}",
+    "publicCert": "{%- for line in stats_crt.split('\n') -%}{{ line }}{%- if not loop.last -%}\n{% endif %}{%- endfor -%}"
+  }
+}

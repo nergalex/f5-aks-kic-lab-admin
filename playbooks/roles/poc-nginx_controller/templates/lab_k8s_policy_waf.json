@@ -1,0 +1,10 @@
+{
+  "metadata": {
+    "name": "lab_k8s_{{ item.name }}",
+    "displayName": "{{ item.name | replace('_', ' ') }}",
+    "description": "Lab K8S"
+  },
+  "desiredState": {
+    "content": {{ lookup('url', item.url, split_lines=False, force=True) | from_json }}
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "metadata": {
+    "name": "lab_k8s_{{ item.name }}",
+    "displayName": "{{ item.name | replace('_', ' ') }}",
+    "description": "Lab K8S"
+  },
+  "desiredState": {
+    "content": {
+      "securityPolicyRef": "/security/policies/lab_k8s_{{ item.name }}"
+    }
+  }
+}

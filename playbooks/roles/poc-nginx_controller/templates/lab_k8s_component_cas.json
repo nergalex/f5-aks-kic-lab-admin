@@ -1,0 +1,161 @@
+{
+  "metadata": {
+    "name": "{{ item.name | lower }}",
+    "displayName": "{{ item.name | lower }}",
+    "description": "WAF {{ item.waf_policy.name | lower }}",
+    "tags": ["site{{ extra_volterra_site_id }}"]
+  },
+  "desiredState": {
+    "ingress": {
+      "uris": {
+        "{{ item.location }}": {
+          "matchMethod": "PREFIX"
+        }
+      },
+      "gatewayRefs": [
+        {
+          "ref": "/services/environments/lab_k8s_{{ extra_volterra_site_id }}/gateways/lab_k8s_{{extra_app.name | lower}}{{ extra_volterra_site_id }}.{{extra_app.domain | lower}}_cn"
+        }
+      ]
+    },
+    "backend": {
+      "httpVersion": "1.1",
+      "ntlmAuthentication": "DISABLED",
+      "preserveHostHeader": "ENABLED",
+      "workloadGroups": {
+        "wlg_{{ item.name | lower }}": {
+          "uris": {
+            {%- if item.nexthop_k8s_service.namespace is defined -%}
+            "http://{{item.nexthop_k8s_service.name }}.{{ extra_ns_prefix }}-{{ item.nexthop_k8s_service.namespace }}.svc.cluster.local": {
+            {% else -%}
+            "http://{{item.nexthop_k8s_service.name }}.{{ extra_ns_prefix }}-{{ extra_app.name }}.svc.cluster.local": {
+            {% endif -%}
+              "isBackup": false,
+              "isDown": false,
+              "isDrain": false
+            }
+          },
+          "dnsServiceDiscovery": {
+            "servers": [
+              "10.200.{{ extra_volterra_site_id }}.10"
+            ],
+            "ttl": "30s",
+            "timeout": "30s"
+          }
+        }
+      },
+      {%- if not (item.monitoring is defined and item.monitoring == 'none') -%}
+      "monitoring": {
+        "defaultState": "HEALTHY",
+        "interval": 5,
+        "consecutiveSuccessThreshold": 3,
+        "consecutiveFailureThreshold": 3,
+        "uri": "{{ item.location }}",
+        "response": {
+          "status": {
+            "codes": [200, 302],
+            "match": true
+          }
+        }
+      }
+     {% endif -%}
+    },
+    "logging": {
+      "accessLog": {
+        "state": "ENABLED"
+      },
+      "errorLog": "ENABLED"
+    },
+    "programmability": {
+      "requestHeaderModifications": [
+        {
+          "action": "ADD",
+          "headerName": "X-Forwarded-For",
+          "headerValue": "$remote_addr"
+        },
+        {
+          "action": "ADD",
+          "headerName": "X-Forwarded-Proto",
+          "headerValue": "$scheme"
+        },
+        {
+          "action": "ADD",
+          "headerName": "X-Real-IP",
+          "headerValue": "$remote_addr"
+        },
+        {
+          "action": "ADD",
+          "headerName": "X-Forwarded-Host",
+          "headerValue": "$http_host"
+        },
+        {
+          "action": "ADD",
+          "headerName": "Host",
+          "headerValue": "$http_host"
+        },
+        {
+          "action": "ADD",
+          "headerName": "Connection",
+          "headerValue": "''"
+        }
+      ],
+      "responseHeaderModifications": [
+        {
+          "action": "ADD",
+          "headerName": "X-Frame-Options",
+          "headerValue": "SAMEORIGIN",
+          "responseCodeFilter": "ALWAYS"
+        },
+        {
+          "action": "ADD",
+          "headerName": "X-Content-Type-Options",
+          "headerValue": "nosniff",
+          "responseCodeFilter": "ALWAYS"
+        },
+        {
+          "action": "ADD",
+          "headerName": "X-XSS-Protection",
+          "headerValue": "'1; mode=block'",
+          "responseCodeFilter": "ALWAYS"
+        },
+        {
+          "action": "ADD",
+          "headerName": "Strict-Transport-Security",
+          "headerValue": "'max-age=15552001; includeSubDomains;'",
+          "responseCodeFilter": "ALWAYS"
+        }
+      ]
+    },
+    "security": {
+      {%- if item.waf_policy.name == 'generic' -%}
+        "strategyRef": {
+          "ref": "/security/strategies/balanced_default"
+        },
+        "waf": {
+          "isEnabled": true,
+          "isMonitorOnly": false,
+          "signatureOverrides": {
+            "200002195": {
+              "action": "IGNORE"
+            }
+          }
+        }
+      {% elif item.waf_policy.name == 'none' -%}
+        "strategyRef": {
+          "ref": "/security/strategies/balanced_default"
+        },
+        "waf": {
+          "isEnabled": false,
+          "isMonitorOnly": false
+        }
+      {% else -%}
+        "strategyRef": {
+          "ref": "/security/strategies/lab_k8s_{{ item.waf_policy.name }}"
+        },
+        "waf": {
+          "isEnabled": true,
+        }
+      {% endif -%}
+    }
+  }
+}

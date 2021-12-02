@@ -1,0 +1,268 @@
+- name: Retrieve the NGINX Controller auth token
+  include_role:
+    name: nginxinc.nginx_controller_generate_token
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller.ip}}"
+    nginx_controller_user_email: "{{extra_nginx_controller.username}}"
+    nginx_controller_user_password: "{{extra_nginx_controller.password}}"
+
+- name: COMMON - Create WAF policy
+  uri:
+    url: "https://{{ extra_nginx_controller.ip }}/api/v1/security/policies/lab_k8s_{{ item.name }}"
+    method: PUT
+    headers:
+      Content-Type: "application/json"
+      Cookie: "{{ nginx_controller_auth_token }}"
+    body: "{{ lookup('template','lab_k8s_policy_waf.json') }}"
+    body_format: json
+    return_content: yes
+    validate_certs: no
+    status_code: 200, 201, 202
+  loop: "{{ extra_policies }}"
+
+- name: COMMON - Create Security strategy
+  uri:
+    url: "https://{{ extra_nginx_controller.ip }}/api/v1/security/strategies/lab_k8s_{{ item.name }}"
+    method: PUT
+    headers:
+      Content-Type: "application/json"
+      Cookie: "{{ nginx_controller_auth_token }}"
+    body: "{{ lookup('template','lab_k8s_security_strategy.json') }}"
+    body_format: json
+    return_content: yes
+    validate_certs: no
+    status_code: 200, 201, 202
+  loop: "{{ extra_policies }}"
+
+- name: COMMON - Create User Role - SuperNetOps
+  include_role:
+    name: nginxinc.nginx_controller_user_role
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller.ip}}"
+    nginx_controller_user_role:
+      metadata:
+        name: "lab_k8s_supernetops"
+        displayName: "SuperNetOps"
+        description: "Instance Owner"
+        tags:
+          - "all_sites"
+      desiredState:
+        permissions:
+          - path: "/services/"
+            access: "READ"
+          - path: "/infrastructure/"
+            access: "FULL"
+          - path: "/platform/"
+            access: "NONE"
+
+- name: COMMON - Create User - SuperNetOps
+  include_role:
+    name: nginxinc.nginx_controller_user
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller.ip}}"
+    nginx_controller_user:
+      metadata:
+        name: supernetops@f5cloudbuilder.dev
+        displayName: "SuperNetOps"
+        description: "Instance Owner"
+        tags:
+          - "all_sites"
+      desiredState:
+        firstName:  Super
+        lastName:  NetOps
+        email:  supernetops@f5cloudbuilder.dev
+        password: "NGINXC0ntroller!"
+        verifyPassword:  "NGINXC0ntroller!"
+        isEnabled:  true
+        roles:
+          - ref: "/platform/roles/lab_k8s_supernetops"
+
+- name: COMMON - Create User Role - SuperSecOps
+  include_role:
+    name: nginxinc.nginx_controller_user_role
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller.ip}}"
+    nginx_controller_user_role:
+      metadata:
+        name: "lab_k8s_supersecops"
+        displayName: "SuperSecOps"
+        description: "Security policy Owner"
+        tags:
+          - "all_sites"
+      desiredState:
+        permissions:
+          - path: "/services/"
+            access: "READ"
+          - path: "/security/policies"
+            access: "FULL"
+          - path: "/security/strategies"
+            access: "FULL"
+          - path: "/infrastructure/"
+            access: "NONE"
+          - path: "/platform/"
+            access: "NONE"
+
+- name: COMMON - Create User - SuperSecOps
+  include_role:
+    name: nginxinc.nginx_controller_user
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller.ip}}"
+    nginx_controller_user:
+      metadata:
+        name: supersecops@f5cloudbuilder.dev
+        displayName: "SuperSecOps"
+        description: "Security policy Owner"
+        tags:
+          - "all_sites"
+      desiredState:
+        firstName:  Super
+        lastName:  SecOps
+        email:  supersecops@f5cloudbuilder.dev
+        password: "NGINXC0ntroller!"
+        verifyPassword:  "NGINXC0ntroller!"
+        isEnabled:  true
+        roles:
+          - ref: "/platform/roles/lab_k8s_supersecops"
+
+- name: COMMON - Create User Role - napinstance
+  include_role:
+    name: nginxinc.nginx_controller_user_role
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller.ip}}"
+    nginx_controller_user_role:
+      metadata:
+        name: "lab_k8s_napinstance"
+        displayName: "NAP instance"
+        description: "Unregister instance"
+        tags:
+          - "all_sites"
+      desiredState:
+        permissions:
+          - path: "/services/"
+            access: "NONE"
+          - path: "/security/"
+            access: "NONE"
+          - path: "/infrastructure/instances"
+            access: "FULL"
+          - path: "/infrastructure/locations"
+            access: "FULL"
+          - path: "/infrastructure/instance-groups"
+            access: "NONE"
+          - path: "/infrastructure/instance-templates"
+            access: "NONE"
+          - path: "/platform/"
+            access: "NONE"
+
+- name: COMMON - Create User - napinstance
+  include_role:
+    name: nginxinc.nginx_controller_user
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller.ip}}"
+    nginx_controller_user:
+      metadata:
+        name: nap@f5cloudbuilder.dev
+        displayName: "NAP"
+        description: "Unregister me"
+        tags:
+          - "all_sites"
+      desiredState:
+        firstName:  NAP
+        lastName:  instance
+        email:  nap@f5cloudbuilder.dev
+        password: "NGINXC0ntroller!"
+        verifyPassword:  "NGINXC0ntroller!"
+        isEnabled:  true
+        roles:
+          - ref: "/platform/roles/lab_k8s_napinstance"
+
+- name: TENANT - Create location
+  include_role:
+    name: nginxinc.nginx_controller_location
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller.ip}}"
+    nginx_controller_location: "{{ lookup('template','lab_k8s_location.json') }}"
+
+- name: TENANT - Create instance group
+  uri:
+    url: "https://{{ extra_nginx_controller.ip }}/api/v1/infrastructure/instance-groups/lab_k8s_{{ extra_volterra_site_id }}"
+    method: PUT
+    headers:
+      Content-Type: "application/json"
+      Cookie: "{{ nginx_controller_auth_token }}"
+    body: "{{ lookup('template','lab_k8s_instance_group.json') }}"
+    body_format: json
+    return_content: yes
+    validate_certs: no
+    status_code: 200, 201, 202
+
+
+- name: TENANT - Create environment
+  include_role:
+    name: nginxinc.nginx_controller_environment
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller.ip}}"
+    nginx_controller_environment:
+      metadata:
+        name: "lab_k8s_{{ extra_volterra_site_id }}"
+        displayName: "K8S lab - site {{ extra_volterra_site_id }}"
+        description: "f5-k8s-ctfd.docs.emea.f5se.com"
+        tags:
+          - "site{{ extra_volterra_site_id }}"
+
+- name: TENANT - Create User Role - DevOps
+  include_role:
+    name: nginxinc.nginx_controller_user_role
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller.ip}}"
+    nginx_controller_user_role:
+      metadata:
+        name: "lab_k8s_{{ extra_volterra_site_id }}_devops"
+        displayName: "site {{ extra_volterra_site_id }} | DevOps"
+        description: "Application Owner"
+        tags:
+          - "site{{ extra_volterra_site_id }}"
+      desiredState:
+        permissions:
+          - path: "/security/strategies"
+            access: "READ"
+          - path: "/security/identity-providers"
+            access: "READ"
+          - path: "/services/environments/"
+            access: "NONE"
+          - path: "/services/environments/lab_k8s_{{ extra_volterra_site_id }}"
+            access: "FULL"
+          - path: "/services/errorsets"
+            access: "READ"
+          - path: "/infrastructure/"
+            access: "READ"
+          - path: "/infrastructure/instances"
+            access: "NONE"
+          - path: "/infrastructure/locations/"
+            access: "NONE"
+          - path: "/infrastructure/locations/site{{ extra_volterra_site_id }}_waap_managed"
+            access: "READ"
+
+- name: TENANT - Create User - DevOps
+  include_role:
+    name: nginxinc.nginx_controller_user
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller.ip}}"
+    nginx_controller_user:
+      metadata:
+        name: "devops{{ extra_volterra_site_id }}@f5cloudbuilder.dev"
+        displayName: "site {{ extra_volterra_site_id }} | DevOps"
+        description: "Application Owner"
+        tags:
+          - "site{{ extra_volterra_site_id }}"
+      desiredState:
+        firstName:  "site{{ extra_volterra_site_id }}"
+        lastName:  DevOps
+        email:  "devops{{ extra_volterra_site_id }}@f5cloudbuilder.dev"
+        password: "NGINXC0ntroller!"
+        verifyPassword:  "NGINXC0ntroller!"
+        isEnabled:  true
+        roles:
+          - ref: "/platform/roles/lab_k8s_{{ extra_volterra_site_id }}_devops"
+
+
+
