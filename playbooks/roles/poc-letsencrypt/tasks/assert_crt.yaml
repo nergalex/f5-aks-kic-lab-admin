@@ -1,0 +1,28 @@
+- name: set FQDN
+  set_fact:
+    var_fqdn: "{{ extra_app.name }}{{ extra_volterra_site_id }}.{{ extra_app.domain }}"
+
+- name: OpenSSL - Check validity of CRT
+  openssl_certificate_info:
+    path: "{{ _letsencrypt_path }}/{{ extra_project }}/{{ var_fqdn }}.crt"
+    valid_at:
+      valid_point: "+10d"
+  register: var_crt_info
+
+- debug:
+    var: var_crt_info
+
+- name: CHECK if certificate is valid and signed by letsencrypt
+  assert:
+    that:
+      # - var_crt_info.valid_at.valid_point
+      - var_crt_info.issuer.commonName == "R3"
+      - stats_acme_challenge.authorizations[var_fqdn].status == 'valid'
+      # - var_crt_info.issuer.commonName == "(STAGING) Artificial Apricot R3"
+
+
+
+
+
+
+

@@ -1,0 +1,145 @@
+- name: set FQDN
+  set_fact:
+    var_fqdn: "{{ extra_app.name }}{{ extra_volterra_site_id }}.{{ extra_app.domain }}"
+
+- name: Create a directory if it does not exist
+  ansible.builtin.file:
+    path: "{{ _letsencrypt_path }}/{{ extra_project }}/"
+    state: directory
+    mode: '0700'
+
+- name: OpenSSL - Generate an account private Key
+  openssl_privatekey:
+    path: "{{ _letsencrypt_path }}/{{ extra_project }}/account.key"
+    type: "{{ extra_letsencrypt_key_type | default(_letsencrypt_key_type) }}"
+    size: "{{ extra_letsencrypt_key_size | default(_letsencrypt_key_size) }}"
+    state: present
+
+- name: OpenSSL - Generate a private Key
+  openssl_privatekey:
+    path: "{{ _letsencrypt_path }}/{{ extra_project }}/{{ var_fqdn }}.key"
+    type: "{{ extra_letsencrypt_key_type | default(_letsencrypt_key_type) }}"
+    size: "{{ extra_letsencrypt_key_size | default(_letsencrypt_key_size) }}"
+    state: present
+
+- name: SET SAN
+  set_fact:
+    var_san_list:
+      - "{{ var_fqdn }}"
+#      - "beta-{{ var_fqdn }}"
+
+- name: OpenSSL - Generate a CSR
+  openssl_csr:
+    privatekey_path: "{{ _letsencrypt_path }}/{{ extra_project }}/{{ var_fqdn }}.key"
+    path: "{{ _letsencrypt_path }}/{{ extra_project }}/{{ var_fqdn }}.csr"
+    country_name: "{{ extra_letsencrypt_country_name | default(_letsencrypt_country_name) }}"
+    state_or_province_name: "{{ extra_letsencrypt_state_name | default(_letsencrypt_state_name) }}"
+    locality_name: "{{ extra_letsencrypt_locality_name | default(_letsencrypt_locality_name) }}"
+    organization_name: "{{ extra_letsencrypt_organization_name | default(_letsencrypt_organization_name) }}"
+    organizational_unit_name: "{{ extra_letsencrypt_organizational_unit_name | default(_letsencrypt_organizational_unit_name) }}"
+    common_name: "{{ var_fqdn }}"
+    subject_alt_name: "{{  var_san_list | default([]) | map('regex_replace', '^', 'DNS:') | list }}"
+    email_address: "{{ extra_email_address | default(_letsencrypt_email_address) }}"
+    digest: "{{ extra_letsencrypt_digest | default(_letsencrypt_digest) }}"
+    state: present
+
+- name: OpenSSL - GET CRT
+  openssl_certificate_info:
+    path: "{{ _letsencrypt_path }}/{{ extra_project }}/{{ var_fqdn }}.crt"
+  register: var_crt_info
+  ignore_errors: yes
+
+- name: OpenSSL - Generate a temporaty CRT for initial challenge
+  openssl_certificate:
+    privatekey_path: "{{ _letsencrypt_path }}/{{ extra_project }}/{{ var_fqdn }}.key"
+    csr_path: "{{ _letsencrypt_path }}/{{ extra_project }}/{{ var_fqdn }}.csr"
+    path: "{{ _letsencrypt_path }}/{{ extra_project }}/{{ var_fqdn }}.crt"
+    provider: selfsigned
+    state: present
+  register: var_certificate
+  when: var_crt_info.failed
+
+- name: ACME - Validate challenge and Fetch CRT (tips is to use stats var) - loop 2
+  community.crypto.acme_certificate:
+    account_key_src: "{{ _letsencrypt_path }}/{{ extra_project }}/account.key"
+    csr: "{{ _letsencrypt_path }}/{{ extra_project }}/{{ var_fqdn }}.csr"
+    dest: "{{ _letsencrypt_path }}/{{ extra_project }}/{{ var_fqdn }}.crt"
+    fullchain_dest: "{{ _letsencrypt_path }}/{{ extra_project }}/{{ var_fqdn }}-fullchain.crt"
+    chain_dest: "{{ _letsencrypt_path }}/{{ extra_project }}/{{ var_fqdn }}-intermediate.crt"
+    data: "{{ stats_acme_challenge }}"
+    # acme_directory: "https://acme-staging-v02.api.letsencrypt.org/directory"
+    acme_directory: "https://acme-v02.api.letsencrypt.org/directory"
+    terms_agreed: yes
+    acme_version: 2
+    force: yes
+  when: stats_acme_challenge is defined
+
+- name: ACME - Get challenge status or create challenge if challenge is not deployed (tips is to use stats var) - loop 1
+  community.crypto.acme_certificate:
+    account_key_src: "{{ _letsencrypt_path }}/{{ extra_project }}/account.key"
+    csr: "{{ _letsencrypt_path }}/{{ extra_project }}/{{ var_fqdn }}.csr"
+    dest: "{{ _letsencrypt_path }}/{{ extra_project }}/{{ var_fqdn }}.crt"
+    remaining_days: "{{ letsencrypt_remaining_days | default(_letsencrypt_remaining_days) }}"
+    account_email: "{{ email_address | default(_letsencrypt_email_address) }}"
+    acme_version: 2
+    # acme_directory: "https://acme-staging-v02.api.letsencrypt.org/directory"
+    acme_directory: "https://acme-v02.api.letsencrypt.org/directory"
+    terms_agreed: yes
+    force: yes
+  register: sample_http_challenge
+  when: stats_acme_challenge is undefined
+
+- name: ACME - Fetch CRT if challenged is valid (tips is to use stats var) - loop 1
+  community.crypto.acme_certificate:
+    account_key_src: "{{ _letsencrypt_path }}/{{ extra_project }}/account.key"
+    csr: "{{ _letsencrypt_path }}/{{ extra_project }}/{{ var_fqdn }}.csr"
+    dest: "{{ _letsencrypt_path }}/{{ extra_project }}/{{ var_fqdn }}.crt"
+    fullchain_dest: "{{ _letsencrypt_path }}/{{ extra_project }}/{{ var_fqdn }}-fullchain.crt"
+    chain_dest: "{{ _letsencrypt_path }}/{{ extra_project }}/{{ var_fqdn }}-intermediate.crt"
+    data: "{{ sample_http_challenge }}"
+    # acme_directory: "https://acme-staging-v02.api.letsencrypt.org/directory"
+    acme_directory: "https://acme-v02.api.letsencrypt.org/directory"
+    terms_agreed: yes
+    acme_version: 2
+    force: yes
+  when: stats_acme_challenge is undefined and sample_http_challenge.authorizations[var_fqdn].status == 'valid'
+
+- name: GET CRT file
+  ansible.builtin.slurp:
+    src: "{{ _letsencrypt_path }}/{{ extra_project }}/{{ var_fqdn }}.crt"
+  register: var_crt_slurp
+
+- name: GET Private Key file
+  ansible.builtin.slurp:
+    src: "{{ _letsencrypt_path }}/{{ extra_project }}/{{ var_fqdn }}.key"
+  register: var_key_slurp
+
+- name: Artifact for Tower Workflows - loop 2
+  set_stats:
+    data:
+      stats_crt:  "{{ var_crt_slurp['content'] | b64decode }}"
+      stats_key:  "{{ var_key_slurp['content'] | b64decode }}"
+  when: stats_acme_challenge is defined
+
+- name: Artifact for Tower Workflows - loop 1 + CRT valid
+  set_stats:
+    data:
+      stats_crt:  "{{ var_crt_slurp['content'] | b64decode }}"
+      stats_key:  "{{ var_key_slurp['content'] | b64decode }}"
+      stats_acme_challenge: "{{ sample_http_challenge }}"
+  when: stats_acme_challenge is undefined and sample_http_challenge.authorizations[var_fqdn].status == 'valid'
+
+- name: Artifact for Tower Workflows - loop 1 + CRT to renew
+  set_stats:
+    data:
+      stats_crt:  "{{ var_crt_slurp['content'] | b64decode }}"
+      stats_key:  "{{ var_key_slurp['content'] | b64decode }}"
+      stats_acme_challenge: "{{ sample_http_challenge }}"
+      stats_acme_http_challenge:  "{{ sample_http_challenge.challenge_data[var_fqdn]['http-01'] }}"
+  when: stats_acme_challenge is undefined and sample_http_challenge.authorizations[var_fqdn].status != 'valid'
+
+
+
+
+
+

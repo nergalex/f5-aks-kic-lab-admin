@@ -1,0 +1,3 @@
+{%- for line in var_crt.split('\n') %}
+{{ line }}
+{% endfor -%}

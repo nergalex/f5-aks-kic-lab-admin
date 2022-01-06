@@ -1,0 +1,14 @@
+---
+# default variables
+activity:
+_letsencrypt_path: /home/cyber
+_letsencrypt_key_type: RSA
+_letsencrypt_key_size: 2048
+_letsencrypt_country_name: FR
+_letsencrypt_state_name: IdF
+_letsencrypt_locality_name: Suresnes
+_letsencrypt_organization_name: F5
+_letsencrypt_organizational_unit_name: SE
+_letsencrypt_email_address: al.dacosta@f5.com
+_letsencrypt_digest: sha256
+_letsencrypt_remaining_days: 10

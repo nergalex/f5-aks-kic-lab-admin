@@ -1,0 +1,99 @@
+- name: INIT var_app
+  set_fact:
+    var_app: []
+    var_san: []
+    var_key_pair: []
+
+- name: SET var_san
+  set_fact:
+    var_san: "{{ var_san }} + [[
+      '{{ extra_app.name }}{{ index }}.{{ extra_app.domain }}',
+      'www.{{ extra_app.name }}{{ index }}.{{ extra_app.domain }}',
+      'www1.{{ extra_app.name }}{{ index }}.{{ extra_app.domain }}'
+    ]]"
+  loop: "{{ range(1, extra_nb_app + 1) | list }}"
+  loop_control:
+    index_var: index
+
+- name: SET var_app
+  set_fact:
+    var_app: "{{ var_app }} + [{
+      'cn': '{{ extra_app.name }}{{ index }}.{{ extra_app.domain }}',
+      'san': {{ var_san[index] }}
+    }]"
+  loop: "{{ range(1, extra_nb_app + 1) | list }}"
+  loop_control:
+    index_var: index
+
+- name: Create a directory if it does not exist
+  ansible.builtin.file:
+    path: "{{ _letsencrypt_path }}/{{ extra_project }}/"
+    state: directory
+    mode: '0700'
+
+#- name: OpenSSL - Generate a private Key
+#  openssl_privatekey:
+#    path: "{{ _letsencrypt_path }}/{{ extra_project }}/{{ item.cn }}.key"
+#    type: "{{ extra_letsencrypt_key_type | default(_letsencrypt_key_type) }}"
+#    size: "{{ extra_letsencrypt_key_size | default(_letsencrypt_key_size) }}"
+#    state: present
+#  loop: "{{ var_app }}"
+#
+#- name: OpenSSL - Generate a CSR
+#  openssl_csr:
+#    privatekey_path: "{{ _letsencrypt_path }}/{{ extra_project }}/{{ item.cn }}.key"
+#    path: "{{ _letsencrypt_path }}/{{ extra_project }}/{{ item.cn }}.csr"
+#    country_name: "{{ extra_letsencrypt_country_name | default(_letsencrypt_country_name) }}"
+#    state_or_province_name: "{{ extra_letsencrypt_state_name | default(_letsencrypt_state_name) }}"
+#    locality_name: "{{ extra_letsencrypt_locality_name | default(_letsencrypt_locality_name) }}"
+#    organization_name: "{{ extra_letsencrypt_organization_name | default(_letsencrypt_organization_name) }}"
+#    organizational_unit_name: "{{ extra_letsencrypt_organizational_unit_name | default(_letsencrypt_organizational_unit_name) }}"
+#    common_name: "{{ item.cn }}"
+#    subject_alt_name: "{{  item.san | default([]) | map('regex_replace', '^', 'DNS:') | list }}"
+#    email_address: "{{ extra_email_address | default(_letsencrypt_email_address) }}"
+#    digest: "{{ extra_letsencrypt_digest | default(_letsencrypt_digest) }}"
+#    state: present
+#  loop: "{{ var_app }}"
+#
+#- name: OpenSSL - Generate a temporaty CRT for initial challenge
+#  openssl_certificate:
+#    privatekey_path: "{{ _letsencrypt_path }}/{{ extra_project }}/{{ item.cn }}.key"
+#    csr_path: "{{ _letsencrypt_path }}/{{ extra_project }}/{{ item.cn }}.csr"
+#    path: "{{ _letsencrypt_path }}/{{ extra_project }}/{{ item.cn }}.crt"
+#    provider: selfsigned
+#    state: present
+#  loop: "{{ var_app }}"
+
+- name: GET CRT file
+  ansible.builtin.slurp:
+    src: "{{ _letsencrypt_path }}/{{ extra_project }}/{{ item.cn }}.crt"
+  register: var_crt_slurp
+  loop: "{{ var_app }}"
+
+- name: GET Private Key file
+  ansible.builtin.slurp:
+    src: "{{ _letsencrypt_path }}/{{ extra_project }}/{{ item.cn }}.key"
+  register: var_key_slurp
+  loop: "{{ var_app }}"
+
+- name: SET var_key_pair
+  set_fact:
+    var_key_pair: "{{ var_key_pair + [{
+      'cn': item.cn,
+      'san': item.san,
+      'crt': var_crt_slurp['results'][index]['content'] | b64decode,
+      'key': var_key_slurp['results'][index]['content'] | b64decode
+    }] }}"
+  loop: "{{ var_app }}"
+  loop_control:
+    index_var: index
+
+- name: Artifact for Tower Workflows
+  set_stats:
+    data:
+      stats_key_pair:  "{{ var_key_pair }}"
+
+
+
+
+
