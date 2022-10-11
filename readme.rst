@@ -281,7 +281,7 @@ extra_waf_policy_level                          Policy fetch from `SecOps repo <
     extra_volterra_site_id: 1
     extra_waf_policy_level: low
 
-Lab 4 - Micro-Proxy -  Ingress Controller
+Lab 4.1 - Micro-Proxy -  Ingress Controller
 =========================================
 Deploy an Ingress Controller dedicated for an Application and accessible only from inside the cluster.
 Launch the workflow template ``wf-k8s-lab4-create-ingress-controller`` and fulfill the survey.
@@ -309,7 +309,7 @@ Job template                                                    objective       
     extra_wildcard_tls_crt: ...
     extra_wildcard_tls_key: ...
 
-Lab 5 - Edge Proxy - Managed NAP
+Lab 5.1 - Edge Proxy - Managed NAP
 =========================================
 
 Deploy NGINX App Protect containerized instances managed by NGINX Controller.
@@ -354,7 +354,7 @@ Extra variable                                  Description
         url: https://raw.githubusercontent.com/nergalex/f5-nap-policies/master/policy/owasp_api_nginx.json
 
 
-Lab 5 - Micro-Proxy - Ingress Controller
+Lab 5.2 - Micro-Proxy - Ingress Controller
 =========================================
 Deploy an Ingress Controller dedicated for an Application and accessible only from inside the cluster.
 Launch the workflow template ``wf-k8s-lab5-create-ingress-controller`` and fulfill the survey.
@@ -388,7 +388,7 @@ Extra variable                                  Description
     extra_wildcard_tls_crt: ...
     extra_wildcard_tls_key: ...
 
-Lab 5 - App sentence-api-managed
+Lab 5.3 - App sentence-api-managed
 =========================================
 
 Deploy application sentence API.
@@ -494,7 +494,7 @@ Extra variable                                         Description
           nexthop_k8s_service:
             name: apigw-microapigw
 
-Lab 5 - App sentence-front-managed
+Lab 5.4 - App sentence-front-managed
 =========================================
 
 Deploy application sentence web frontend.
@@ -556,5 +556,54 @@ Extra variable                                         Description
           nexthop_k8s_service:
             name: frontend
 
+Lab 6.0 Pre-requisites
+=========================================
+    - F5 Distributed Cloud: `Generate API Tokens <https://docs.cloud.f5.com/docs/how-to/user-mgmt/credentials>`_
+    - Okta: `PKCE Setup <https://github.com/nginx-openid-connect/nginx-oidc-core-v2/tree/main/docs/oidc-pkce#pkce-setup-with-okta>`_
 
-TEST
+Lab 6.1 Deploy ACM infra
+=========================================
+Deploy ``Infrastructure`` configuration in NGINX ACM.
+Launch the workflow template ``wf-lab_acm-1_acm_infra`` and fulfill the survey.
+
+================================================================   =============================================       =============================================   ================================================   =============================================   =============================================
+Job template                                                       objective                                           playbook                                        activity or play targeted in role                  inventory                                       credential
+================================================================   =============================================       =============================================   ================================================   =============================================   =============================================
+``poc-letsencrypt-create_acm_devportal_self_signed_certificate``   Create a self signed certificate                    ``playbooks/poc-letsencrypt.yaml``              ``create_acm_devportal_self_signed_certificate``   localhost                                       f5-cloudbuilder-mgmt
+``poc-nginx_acm-create_infra``                                     Create ACM infra's workspace                        ``playbooks/poc-nginx_acm.yaml``                ``create_infra``                                   localhost
+``poc-azure_create-db-postgre``                                    Create Azure PaaS DB for devportal HA               ``playbooks/poc-azure.yaml``                    ``create-db-postgre``                              CMP_inv_CloudBuilderf5                          <Service Principal>
+``poc-nginx_acm-create_db_user``                                   Create a DB for the ACM infra's workspace           ``playbooks/poc-azure.yaml``                    ``create_db_user``                                 CMP_inv_CloudBuilderf5                          <Service Principal>
+================================================================   =============================================       =============================================   ================================================   =============================================   =============================================
+
+=====================================================  =======================================================================================================
+Extra variable in Survey                               Description
+=====================================================  =======================================================================================================
+``extra_volterra_site_id``                             site ID of student, aka student ID
+``extra_producer_name``                                Owner's name of ACM infra's workspace
+``extra_owner_email``                                  Owner's e-mail of ACM infra's workspace
+``extra_environment``                                  Environment type in ACM infra's workspace: PROD or NON-PROD
+``extra_apigw_auth_method``                            Authentication Grant flow used by API GW (ACM >> Infra >> workspace >> environment): PKCE or AuthCode
+=====================================================  =======================================================================================================
+
+Extra variables defined in workflow with example values:
+
+.. code-block:: yaml
+
+    extra_app:
+      name: sentence
+      domain: f5dc.dev
+    extra_okta:
+      tenant: dev-XXX
+      authorization_server_id: xxx
+      app:
+        AuthCode:
+          client_id: xxx
+          client_secret: xxx
+          server_id: xxx
+        PKCE:
+          client_id: xxx
+          server_id: xxx
+    extra_nginx_acm:
+      ip: 1.1.1.1
+      password: AdminPassword
+      username: admin
