@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "name": "{{ extra_app.name }}-{{ item.name }}",
+    "namespace": "{{ extra_volterra_namespace }}",
+    "labels": {
+      "owner": "{{ extra_owner_email.split('@')[0] }}",
+      "project": "cloudbuilder"
+    },
+    "description": "NGINX workshop",
+    "disable": false
+  },
+  "spec": {
+    "origin_servers": [
+      {
+        "k8s_service": {
+          "service_name": "{{ extra_app.name }}-{{ item.name }}.{{ extra_volterra_namespace }}",
+          "site_locator": {
+            "virtual_site": {
+              "tenant": "{{ extra_volterra.tenant.full }}",
+              "namespace": "{{ extra_volterra_namespace }}",
+              "name": "cloudbuilder-landing-zones"
+            }
+          },
+          "vk8s_networks": {}
+        },
+        "labels": {}
+      }
+    ],
+    "no_tls": {},
+    "port": 8080,
+    "same_as_endpoint_port": {},
+    "healthcheck": [
+      {
+        "tenant": "{{ extra_volterra.tenant.full }}",
+        "namespace": "{{ extra_volterra_namespace }}",
+        "name": "{{ extra_app.name }}-{{ item.name }}"
+      }
+    ],
+    "loadbalancer_algorithm": "LB_OVERRIDE",
+    "endpoint_selection": "LOCAL_PREFERRED"
+  }
+}

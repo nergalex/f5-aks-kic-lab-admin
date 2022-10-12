@@ -1,0 +1,23 @@
+---
+- name: SET variables
+  set_fact:
+    var_platform_name: "aksdistrict{{ extra_volterra_site_id }}"
+
+- name: GET Public IP Address
+  delegate_to: localhost
+  azure.azcollection.azure_rm_publicipaddress_info:
+    resource_group: "rg-{{ var_platform_name }}"
+    name: "jumphost-{{ var_platform_name }}"
+  register: output_ip_address
+
+- name: "Artifact for Tower Workflows"
+  set_stats:
+    data:
+      stats_jumphost_ip:  "{{ output_ip_address.publicipaddresses.0.ip_address }}"
+
+
+
+
+
+
+...

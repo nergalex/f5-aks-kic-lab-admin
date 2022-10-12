@@ -1,0 +1,229 @@
+{
+  "metadata": {
+    "name": "cloudbuilder",
+    "namespace": "system",
+    "labels": {
+      "owner": "{{ extra_owner_email.split('@')[0] }}",
+      "project": "cloudbuilder"
+    },
+    "annotations": {},
+    "description": "NGINX workshop",
+    "disable": false
+  },
+  "spec": {
+    "any_proxy": {},
+    "rule_list": {
+      "rules": [
+        {
+          "metadata": {
+            "name": "district-local",
+            "description": "allow internal district communications",
+            "disable": false
+          },
+          "action": "ALLOW",
+          "all_sources": {},
+          "dst_prefix_list": {
+            "prefixes": [
+              "10.0.0.0/8"
+            ]
+          },
+          "no_http_connect_port": {}
+        },
+        {
+          "metadata": {
+            "name": "cross-management-public-ips",
+            "description": "Cross Management Public IPs",
+            "disable": false
+          },
+          "action": "ALLOW",
+          "prefix_list": {
+            "prefixes": ["10.0.0.0/8"]
+          },
+          "dst_prefix_list": {
+            "prefixes": [
+              "52.254.43.3/32"
+            ]
+          },
+          "port_matcher": {
+            "ports": ["80", "443"]
+          },
+          "no_http_connect_port": {}
+        },
+        {
+          "metadata": {
+            "name": "common-services",
+            "description": "Common Services",
+            "disable": false
+          },
+          "action": "ALLOW",
+          "prefix_list": {
+            "prefixes": ["10.0.0.0/8"]
+          },
+          "tls_list": {
+            "tls_list": [
+              {
+                "suffix_value": "okta.com"
+              },
+              {
+                "exact_value": "monip.io"
+              },
+              {
+                "exact_value": "perdu.com"
+              },
+              {
+                "exact_value": "identityauthority.ves.volterra.io"
+              }
+            ]
+          },
+          "no_http_connect_port": {}
+        },
+        {
+          "metadata": {
+            "name": "web-surfing-trusted",
+            "description": "Trusted Categorized Services",
+            "disable": false
+          },
+          "action": "ALLOW",
+          "prefix_list": {
+            "prefixes": ["10.0.0.0/8"]
+          },
+          "url_category_list": {
+            "url_categories": [
+              "REAL_ESTATE",
+              "COMPUTER_AND_INTERNET_SECURITY",
+              "REFERENCE_AND_RESEARCH",
+              "SEARCH_ENGINES",
+              "CONTENT_DELIVERY_NETWORKS",
+              "INTERNET_COMMUNICATIONS"
+            ]
+          },
+          "no_http_connect_port": {}
+        },
+        {
+          "metadata": {
+            "name": "web-surfing-untrusted",
+            "description": "Untrusted Categorized Services",
+            "disable": false
+          },
+          "action": "DENY",
+          "prefix_list": {
+            "prefixes": [
+              "10.0.0.0/8"
+            ]
+          },
+          "url_category_list": {
+            "url_categories": [
+              "UNCATEGORIZED",
+              "FINANCIAL_SERVICES",
+              "BUSINESS_AND_ECONOMY",
+              "COMPUTER_AND_INTERNET_INFO",
+              "AUCTIONS",
+              "SHOPPING",
+              "CULT_AND_OCCULT",
+              "TRAVEL",
+              "ABUSED_DRUGS",
+              "ADULT_AND_PORNOGRAPHY",
+              "HOME_AND_GARDEN",
+              "MILITARY",
+              "SOCIAL_NETWORKING",
+              "INDIVIDUAL_STOCK_ADVICE_AND_TOOLS",
+              "TRAINING_AND_TOOLS",
+              "DATING",
+              "SEX_EDUCATION",
+              "RELIGION",
+              "ENTERTAINMENT_AND_ARTS",
+              "PERSONAL_SITES_AND_BLOGS",
+              "LEGAL",
+              "LOCAL_INFORMATION",
+              "STREAMING_MEDIA",
+              "JOB_SEARCH",
+              "GAMBLING",
+              "TRANSLATION",
+              "MARIJUANA",
+              "GAMES",
+              "PHILOSOPHY_AND_POLITICAL_ADVOCACY",
+              "WEAPONS",
+              "SOCIETY",
+              "EDUCATIONAL_INSTITUTIONS",
+              "ONLINE_GREETING_CARDS",
+              "SPORTS",
+              "SWIMSUITS_AND_INTIMATE_APPAREL",
+              "QUESTIONABLE",
+              "KIDS",
+              "HATE_AND_RACISM",
+              "VIOLENCE",
+              "WEB_ADVERTISEMENTS",
+              "GROSS",
+              "WEB_BASED_EMAIL",
+              "MUSIC",
+              "GOVERNMENT",
+              "NUDITY",
+              "NEWS_AND_MEDIA",
+              "ABORTION",
+              "HEALTH_AND_MEDICINE",
+              "ALCOHOL_AND_TOBACCO",
+              "IMAGE_AND_VIDEO_SEARCH",
+              "FASHION_AND_BEAUTY",
+              "RECREATION_AND_HOBBIES",
+              "MOTOR_VEHICLES",
+              "WEB_HOSTING"
+            ]
+          },
+          "no_http_connect_port": {}
+        },
+        {
+          "metadata": {
+            "name": "web-surfing-malicious",
+            "description": "Malicious Categorized Services",
+            "disable": false
+          },
+          "action": "DENY",
+          "prefix_list": {
+            "prefixes": [
+              "10.0.0.0/8"
+            ]
+          },
+          "url_category_list": {
+            "url_categories": [
+              "DEAD_SITES",
+              "SHAREWARE_AND_FREEWARE",
+              "PEER_TO_PEER",
+              "HACKING",
+              "PAY_TO_SURF",
+              "HUNTING_AND_FISHING",
+              "PERSONAL_STORAGE",
+              "KEYLOGGERS_AND_MONITORING",
+              "INTERNET_PORTALS",
+              "CHEATING",
+              "MALWARE_SITES",
+              "PHISHING_AND_OTHER_FRAUDS",
+              "PROXY_AVOIDANCE_AND_ANONYMIZERS",
+              "SPYWARE_AND_ADWARE",
+              "ILLEGAL",
+              "BOT_NETS",
+              "CONFIRMED_SPAM_SOURCES",
+              "SPAM_URLS",
+              "UNCONFIRMED_SPAM_SOURCES",
+              "OPEN_HTTP_PROXIES",
+              "DYNAMICALLY_GENERATED_CONTENT",
+              "PARKED_DOMAINS",
+              "PRIVATE_IP_ADDRESSES"
+            ]
+          },
+          "no_http_connect_port": {}
+        },
+        {
+          "metadata": {
+            "name": "default-deny",
+            "description": "Default DENY",
+            "disable": false
+          },
+          "action": "DENY",
+          "all_destinations": {},
+          "all_sources": {},
+          "no_http_connect_port": {}
+        }
+      ]
+    }
+  }
+}

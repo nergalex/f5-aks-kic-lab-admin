@@ -1,0 +1,167 @@
+{
+    "name": "{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment | lower }}",
+    "type": "{{ extra_environment }}",
+    "metadata": {
+        "description": "{{ extra_app.name }}{{ extra_volterra_site_id }} {{ extra_environment }}"
+    },
+    "systemProperties": {
+        "acmHostName": "acm"
+    },
+    "functions": [
+        "DEVPORTAL",
+        "API-GATEWAY"
+    ],
+    "proxies": [
+        {
+            "hostnames": [
+                "{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment | lower }}.{{ extra_app.domain }}"
+            ],
+            "proxyClusterName": "{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment | lower }}",
+            "runtime": "GATEWAY-PROXY",
+            "policies": {
+                "log-format": [
+                  {
+                    "metadata": {
+                      "labels": []
+                    },
+                    "systemMetadata": {
+                      "appliedOn": "outbound",
+                      "context": "global"
+                    },
+                    "action": {
+                      "enablePrettyPrint": false,
+                      "errorLogSeverity": "DEBUG",
+                      "logDestination": {
+                        "type": "FILE",
+                        "accessLogFileLocation": "/var/log/nginx/",
+                        "errorLogFileLocation": "/var/log/nginx/"
+                      },
+                      "logFormat": {
+                        "include": [
+                          "BASIC",
+                          "INGRESS",
+                          "BACKEND",
+                          "RESPONSE"
+                        ],
+                        "variables": []
+                      },
+                      "type": "JSON"
+                    }
+                  }
+                ],
+                "oidc-authz": [
+                  {
+                    "metadata": {},
+                    "systemMetadata": {
+                      "appliedOn": "inbound",
+                      "context": "global"
+                    },
+                    "action": {
+                      "authFlowType": "PKCE",
+                      "authorizationEndpoint": "https://{{ extra_okta.tenant }}.okta.com/oauth2/{{ var_okta_auth_server_id }}/v1/authorize",
+                      "errorReturnConditions": {
+                        "noMatch": {
+                          "returnCode": 403
+                        },
+                        "notSupplied": {
+                          "returnCode": 401
+                        }
+                      },
+                      "forwardTokenToBackend": "access_token",
+                      "jwksURI": "https://{{ extra_okta.tenant }}.okta.com/oauth2/{{ var_okta_auth_server_id }}/v1/keys",
+                      "logOffEndpoint": "https://{{ extra_okta.tenant }}.okta.com/oauth2/{{ var_okta_auth_server_id }}/v1/logout",
+                      "returnTokenToClientOnLogin": "id_token",
+                      "tokenEndpoint": "https://{{ extra_okta.tenant }}.okta.com/oauth2/{{ var_okta_auth_server_id }}/v1/token",
+                      "uris": {
+                        "loginURI": "/login",
+                        "logoutURI": "/logout",
+                        "redirectURI": "/_codexch",
+                        "userInfoURI": "/userinfo"
+                      },
+                      "userInfoEndpoint": "https://{{ extra_okta.tenant }}.okta.com/oauth2/{{ var_okta_auth_server_id }}/v1/userinfo"
+                    },
+                    "data": [
+                      {
+                        "appName": "sentence",
+                        "clientID": "{{ var_okta_app_client_id }}",
+                        "scopes": "openid",
+                        "source": "ACM"
+                      }
+                    ]
+                  }
+                ]
+            }
+        },
+        {
+            "hostnames": [
+                "{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment | lower }}-devportal.{{ extra_app.domain }}"
+            ],
+            "proxyClusterName": "{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment | lower }}-devportal",
+            "runtime": "PORTAL-PROXY",
+            "policies": {
+                "oidc-authz": [
+                  {
+                    "metadata": {},
+                    "systemMetadata": {
+                      "appliedOn": "inbound",
+                      "context": "global"
+                    },
+                    "action": {
+                      "authFlowType": "PKCE",
+                      "authorizationEndpoint": "https://{{ extra_okta.tenant }}.okta.com/oauth2/{{ var_okta_auth_server_id }}/v1/authorize",
+                      "errorReturnConditions": {
+                        "noMatch": {
+                          "returnCode": 403
+                        },
+                        "notSupplied": {
+                          "returnCode": 401
+                        }
+                      },
+                      "forwardTokenToBackend": "access_token",
+                      "jwksURI": "https://{{ extra_okta.tenant }}.okta.com/oauth2/{{ var_okta_auth_server_id }}/v1/keys",
+                      "logOffEndpoint": "https://{{ extra_okta.tenant }}.okta.com/oauth2/{{ var_okta_auth_server_id }}/v1/logout",
+                      "returnTokenToClientOnLogin": "none",
+                      "tokenEndpoint": "https://{{ extra_okta.tenant }}.okta.com/oauth2/{{ var_okta_auth_server_id }}/v1/token",
+                      "uris": {
+                        "loginURI": "/login",
+                        "logoutURI": "/logout",
+                        "redirectURI": "/_codexch",
+                        "userInfoURI": "/userinfo"
+                      },
+                      "userInfoEndpoint": "https://{{ extra_okta.tenant }}.okta.com/oauth2/{{ var_okta_auth_server_id }}/v1/userinfo"
+                    },
+                    "data": [
+                      {
+                        "appName": "sentence",
+                        "clientID": "{{ var_okta_app_client_id }}",
+                        "scopes": "email+openid+profile",
+                        "source": "ACM"
+                      }
+                    ]
+                  }
+                ]
+            }
+        },
+        {
+            "hostnames": [
+                "{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment | lower }}-devportal-internal.{{ extra_app.domain }}"
+            ],
+            "proxyClusterName": "{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment | lower }}-devportal",
+            "runtime": "INT-PORTAL-ACM-PROXY",
+            "policies": {
+                "tls-inbound": [
+                    {
+                        "data": {
+                            "serverCerts": [
+                                {
+                                    "key": "{%- for line in stats_key.split('\n') -%}{%- if line != '' -%}{{ line }}\n{%- endif -%}{%- endfor -%}",
+                                    "cert": "{%- for line in stats_crt.split('\n') -%}{%- if line != '' -%}{{ line }}\n{%- endif -%}{%- endfor -%}"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        }
+    ]
+}

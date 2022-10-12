@@ -1,0 +1,25 @@
+---
+- name: SET variables
+  set_fact:
+    var_platform_name: "aksdistrict{{ extra_volterra_site_id }}"
+
+- name: Create an azure container registry
+  delegate_to: localhost
+  azure.azcollection.azure_rm_containerregistry:
+    name: "{{ var_platform_name }}"
+    location: "{{ extra_location }}"
+    resource_group: "rg-{{ var_platform_name }}"
+    admin_user_enabled: true
+    sku: Basic
+    tags: "{{ extra_platform_tags }} Name=rg-{{ var_platform_name }} owner={{ extra_owner_email }}"
+  register: output
+
+- name: Credentials
+  debug:
+    msg: "
+    login_server: {{ output.login_server }};
+    Username: CloudBuilder;
+    password: {{ output.credentials.password }};
+    password2: {{ output.credentials.password2 }};
+    "
+...

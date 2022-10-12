@@ -1,0 +1,97 @@
+{
+  "metadata": {
+    "name": "nginx-apigw",
+    "namespace": "{{ extra_volterra_namespace }}",
+    "labels": {
+      "owner": "{{ extra_owner_email.split('@')[0] }}",
+      "project": "cloudbuilder"
+    },
+    "annotations": {
+      "ves.io/app": "nginx-apigw",
+      "ves.io/workload-flavor": "ves-io-medium"
+    },
+    "description": "NGINX workshop",
+    "disable": false
+  },
+    "spec": {
+        "service":  {
+            "num_replicas": 1,
+            "containers": [
+                {
+                    "name": "nginx-agent",
+                    "image": {
+                        "name": "{{ stats_acr_login_server }}/nginx-agent:{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment }}",
+                        "container_registry": {
+                            "tenant": "{{ extra_volterra.tenant.full }}",
+                            "namespace": "{{ extra_volterra_namespace }}",
+                            "name": "{{ stats_acr_login_server  | replace('.', '-') }}"
+                        },
+                        "pull_policy": "IMAGE_PULL_POLICY_ALWAYS"
+                    },
+                    "init_container": false
+                }
+            ],
+            "configuration": {
+                "parameters":
+                [
+                    {
+                        "env_var":
+                        {
+                            "name": "ENV_CONTROLLER_INSTANCE_GROUP",
+                            "value": "{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment }}"
+                        }
+                    },
+                    {
+                        "env_var":
+                        {
+                            "name": "ENV_CONTROLLER_HOST",
+                            "value": "tmp"
+                        }
+                    },
+                  {
+                        "env_var":
+                        {
+                            "name": "ENV_CONTROLLER_USER",
+                            "value": "tmp"
+                        }
+                    },
+                    {
+                        "env_var":
+                        {
+                            "name": "ENV_CONTROLLER_PASSWORD",
+                            "value": "tmp"
+                        }
+                    }
+                ]
+            },
+            "deploy_options":
+            {
+                "default_virtual_sites": {}
+            },
+            "advertise_options": {
+              "advertise_in_cluster": {
+                "multi_ports": {
+                  "ports": [
+                    {
+                      "name": "http",
+                      "info": {
+                        "port": 80,
+                        "protocol": "PROTOCOL_TCP",
+                        "same_as_port": {}
+                      }
+                    },
+                    {
+                      "name": "https",
+                      "info": {
+                        "port": 443,
+                        "protocol": "PROTOCOL_TCP",
+                        "same_as_port": {}
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+        }
+    }
+}

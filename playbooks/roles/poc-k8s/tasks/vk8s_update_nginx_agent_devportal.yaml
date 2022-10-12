@@ -1,0 +1,49 @@
+---
+- name: set var NameSpace Auto
+  set_fact:
+    extra_volterra_namespace: "{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment }}"
+  when: extra_namespace == 'auto'
+
+- name: set var NameSpace Defined
+  set_fact:
+    extra_volterra_namespace: "{{ extra_namespace }}"
+  when: extra_namespace != 'auto'
+
+- name: set variable
+  set_fact:
+    var_credential:
+      username: "{{ extra_nginx_acm.user }}"
+      password: "{{ extra_nginx_acm.password }}"
+
+- name: CREATE Secret ACM
+  kubernetes.core.k8s:
+    definition: "{{ lookup('template', 'secret-nginx-acm.yaml') | from_yaml }}"
+    kubeconfig: "{{ extra_kubeconfig | from_yaml }}"
+
+- name: UPDATE Deployment nginx-agent
+  kubernetes.core.k8s:
+    definition: "{{ lookup('template', 'deployment-vk8s-acm-agent.yaml') | from_yaml }}"
+    kubeconfig: "{{ extra_kubeconfig | from_yaml }}"
+
+- name: set variable
+  set_fact:
+    var_credential:
+      username: nginxdm@nginx-devportal-db
+      password: nginxdm
+
+- name: CREATE Secret Devportal DB
+  kubernetes.core.k8s:
+    definition: "{{ lookup('template', 'secret-nginx-acm-devportal-db.yaml') | from_yaml }}"
+    kubeconfig: "{{ extra_kubeconfig | from_yaml }}"
+
+- name: UPDATE Deployment nginx-devportal
+  kubernetes.core.k8s:
+    definition: "{{ lookup('template', 'deployment-vk8s-acm-devportal.yaml') | from_yaml }}"
+    kubeconfig: "{{ extra_kubeconfig | from_yaml }}"
+
+
+
+
+
+
+...

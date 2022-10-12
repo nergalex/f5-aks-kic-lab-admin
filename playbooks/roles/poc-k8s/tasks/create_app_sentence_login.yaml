@@ -1,0 +1,108 @@
+- name: set var NameSpace Auto
+  set_fact:
+    extra_volterra_namespace: "{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_env }}"
+  when: extra_namespace == 'auto'
+
+- name: set var NameSpace Defined
+  set_fact:
+    extra_volterra_namespace: "{{ extra_namespace }}"
+  when: extra_namespace != 'auto'
+
+- name: Create or Update Workload from gitlab registry
+  block:
+
+    - name: GET Workload from public registry
+      uri:
+        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/workloads/{{ extra_app.name }}-{{ item.name }}"
+        method: GET
+        headers:
+          Content-Type: application/json
+          Authorization: "APIToken {{ extra_volterra.token }}"
+        status_code: 200, 404
+        validate_certs: no
+      loop: "{{ extra_app.components }}"
+      when: item.image is defined
+      register: var_register
+
+    - name: CREATE Workload from public registry
+      uri:
+        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/workloads"
+        method: POST
+        headers:
+          Content-Type: application/json
+          Authorization: "APIToken {{ extra_volterra.token }}"
+        body: "{{ lookup('template','workload_sentence_login.json') }}"
+        body_format: json
+        status_code: 200
+        validate_certs: no
+      loop: "{{ extra_app.components }}"
+      loop_control:
+        index_var: cur_index
+      when: item.image is defined and var_register.results[cur_index].status == 404
+
+    - name: UPDATE Workload from public registry
+      uri:
+        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/workloads/{{ extra_app.name }}-{{ item.name }}"
+        method: PUT
+        headers:
+          Content-Type: application/json
+          Authorization: "APIToken {{ extra_volterra.token }}"
+        body: "{{ lookup('template','workload_sentence_login.json') }}"
+        body_format: json
+        status_code: 200
+        validate_certs: no
+      loop: "{{ extra_app.components }}"
+      loop_control:
+        index_var: cur_index
+      when: item.image is defined and var_register.results[cur_index].status == 200
+
+- name: Create or Update Workload from private registry
+  block:
+
+    - name: GET Workload from gitlab registry
+      uri:
+        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/workloads/{{ extra_app.name }}-{{ item.name }}"
+        method: GET
+        headers:
+          Content-Type: application/json
+          Authorization: "APIToken {{ extra_volterra.token }}"
+        status_code: 200, 404
+        validate_certs: no
+      loop: "{{ extra_app.components }}"
+      when: item.repo is defined
+      register: var_register
+
+    - name: CREATE Workload from private registry
+      uri:
+        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/workloads"
+        method: POST
+        headers:
+          Content-Type: application/json
+          Authorization: "APIToken {{ extra_volterra.token }}"
+        body: "{{ lookup('template','workload_sentence_login_acr.json') }}"
+        body_format: json
+        status_code: 200
+        validate_certs: no
+      loop: "{{ extra_app.components }}"
+      loop_control:
+        index_var: cur_index
+      when: item.repo is defined and var_register.results[cur_index].status == 404
+
+    - name: UPDATE Workload from private registry
+      uri:
+        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/workloads/{{ extra_app.name }}-{{ item.name }}"
+        method: PUT
+        headers:
+          Content-Type: application/json
+          Authorization: "APIToken {{ extra_volterra.token }}"
+        body: "{{ lookup('template','workload_sentence_login_acr.json') }}"
+        body_format: json
+        status_code: 200
+        validate_certs: no
+      loop: "{{ extra_app.components }}"
+      loop_control:
+        index_var: cur_index
+      when: item.repo is defined and var_register.results[cur_index].status == 200
+
+
+

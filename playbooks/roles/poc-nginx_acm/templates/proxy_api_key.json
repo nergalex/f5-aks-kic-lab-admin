@@ -1,0 +1,75 @@
+{
+    "name": "{{ item.name }}-{{ extra_environment | lower }}",
+    "version": "0.1",
+    "specRef": "{{ item.name }}-0-1",
+    "proxyConfig":
+    {
+        "hostname": "{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment | lower }}.{{ extra_app.domain }}",
+        "policies": {
+          "apikey-authn": [
+            {
+              "action": {
+                "apiKeyName": "apikey",
+                "credentialForward": false,
+                "errorReturnConditions": {
+                  "notSupplied": {
+                    "returnCode": 401
+                  },
+                  "noMatch": {
+                    "returnCode": 403
+                  }
+                },
+                "suppliedIn": "header"
+              },
+              "data": [],
+              "metadata": {
+                "labels": []
+              },
+              "systemMetadata": {
+                "appliedOn": "inbound",
+                "context": "proxy"
+              }
+            }
+          ]
+        },
+        "ingress":
+        {
+            "basePathVersionAppendRule": "SUFFIX",
+            "stripBasePathVersion": true,
+            "basePath": "/api/ms-{{ item.name }}"
+        },
+        "backends":
+        [
+            {
+                "enableSRVRecordLookUp": false,
+                "label":
+                {
+                    "targetName": "default"
+                },
+                "serviceContextRoot": "/",
+                "serviceName": "{{ item.name }}",
+                "serviceTargets":
+                [
+                    {
+                        "hostname": "ms-{{ item.name }}",
+                        "listener":
+                        {
+                            "enableTLS": false,
+                            "port": 80,
+                            "transportProtocol": "HTTP"
+                        },
+                        "maxConnections": 0,
+                        "maxFails": 1
+                    }
+                ],
+                "isSRVRecordLookUpEnabled": false,
+                "isResolverEnabled": false
+            }
+        ]
+    },
+    "portalConfig":
+    {
+        "hostname": "{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment | lower }}-devportal.{{ extra_app.domain }}",
+        "category": "{{ extra_app.name }}"
+    }
+}

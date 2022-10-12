@@ -1,0 +1,31 @@
+---
+- name: SET variables
+  set_fact:
+    var_platform_name: "aksdistrict{{ extra_volterra_site_id }}"
+
+- name: GET info on Azure Kubernetes Service
+  delegate_to: localhost
+  azure.azcollection.azure_rm_aks_info:
+    resource_group: "rg-{{ var_platform_name }}"
+    name: CloudBuilder
+    show_kubeconfig: admin
+  register: cluster_admin
+
+- name: GET info on Azure Kubernetes Service
+  delegate_to: localhost
+  azure.azcollection.azure_rm_aks_info:
+    resource_group: "rg-{{ var_platform_name }}"
+    name: CloudBuilder
+    show_kubeconfig: user
+  register: cluster_user
+
+- debug:
+    var: cluster_user
+
+- name: "Artifact for Tower Workflows"
+  set_stats:
+    data:
+      stats_kubeconfig_admin:  "{{ cluster_admin.aks.0.kube_config }}"
+      stats_kubeconfig_user:  "{{ cluster_user.aks.0.kube_config }}"
+
+...

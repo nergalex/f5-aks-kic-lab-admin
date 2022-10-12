@@ -1,0 +1,47 @@
+---
+# INSTALL Openssl
+# sudo yum install gcc openssl-devel bzip2-devel libffi-devel zlib-devel
+## "sudo yum install perl-core": optional ???
+## "sudo yum group install 'Development Tools'": optional ???
+# cd /opt
+# wget https://www.openssl.org/source/openssl-1.1.1o.tar.gz
+# tar zxvf openssl-1.1.1o.tar.gz
+# cd openssl-1.1.1o/
+# ./config --prefix=/opt/openssl --openssldir=/opt/openssl no-ssl2
+# make
+# make install
+## source: https://help.dreamhost.com/hc/en-us/articles/360001435926-Installing-OpenSSL-locally-under-your-username
+## source: https://cloudwafer.com/blog/installing-openssl-on-centos-7/
+
+# INSTALL Python3
+# wget https://www.python.org/ftp/python/3.10.5/Python-3.10.5.tgz
+# tar xzf Python-3.10.5.tgz
+# cd Python-3.10.5/
+# ./configure --enable-optimizations --with-openssl=/opt/openssl --with-openssl-rpath=/opt/openssl/lib/
+# make altinstall
+
+- name: INSTALL python package Docker
+  pip:
+    name:
+      # - docker==4.4.4
+      - docker==5.0.3
+      # - websocket-client==0.59.0
+    executable: /usr/local/bin/pip3.10
+
+- name: Log into private registry and force re-authorization
+  docker_login:
+    registry: "{{ stats_acr_login_server }}"
+    username: "{{ stats_acr_username }}"
+    password: "{{ stats_acr_password }}"
+    reauthorize: yes
+
+- name: Build an image and push it to a private repo
+  docker_image:
+    path: "/root/source_images/{{ item.name }}-{{ item.version }}"
+    name: "{{ stats_acr_login_server }}/{{ item.name }}"
+    tag: "{{ item.version }}"
+    push: yes
+  loop: "{{ extra_app.components }}"
+  when: item.repo is defined
+
+...

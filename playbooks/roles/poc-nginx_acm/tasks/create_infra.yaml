@@ -1,0 +1,158 @@
+- name: variables AuthCode
+  set_fact:
+    var_environment_template: "environment_oidc_auth_code.json"
+    # var_okta_app_client_secret: "{{ extra_okta.app.AuthCode.client_secret }}"
+  when:  extra_apigw_auth_method == 'AuthCode'
+
+- name: variables PKCE
+  set_fact:
+    var_environment_template: "environment_oidc_auth_code_pkce.json"
+  when: extra_apigw_auth_method == 'PKCE'
+
+- name: variables
+  set_fact:
+    var_okta_app_client_id: "{{ extra_okta.app[extra_apigw_auth_method].client_id }}"
+    var_okta_auth_server_id: "{{ extra_okta.app[extra_apigw_auth_method].server_id }}"
+
+- name: Create or Update infrastructure >> workspace
+  block:
+
+  - name: GET infrastructure >> workspace
+    uri:
+      url: "https://{{ extra_nginx_acm.ip }}/api/acm/v1/infrastructure/workspaces/{{ extra_app.name }}{{ extra_volterra_site_id }}"
+      method: GET
+      return_content: yes
+      validate_certs: no
+      force_basic_auth: yes
+      url_username: "{{ extra_nginx_acm.username }}"
+      url_password: "{{ extra_nginx_acm.password }}"
+      status_code: 200, 404
+    register: var_register
+
+  - name: CREATE infrastructure >> workspace
+    uri:
+      url: "https://{{ extra_nginx_acm.ip }}/api/acm/v1/infrastructure/workspaces"
+      method: POST
+      headers:
+        Content-Type: "application/json"
+      body: "{{ lookup('template','workspace.json') }}"
+      body_format: json
+      return_content: yes
+      validate_certs: no
+      force_basic_auth: yes
+      url_username: "{{ extra_nginx_acm.username }}"
+      url_password: "{{ extra_nginx_acm.password }}"
+      status_code: 201, 202
+    when: var_register.status == 404
+
+  - name: UPDATE infrastructure >> workspace
+    uri:
+      url: "https://{{ extra_nginx_acm.ip }}/api/acm/v1/infrastructure/workspaces/{{ extra_app.name }}{{ extra_volterra_site_id }}"
+      method: PUT
+      headers:
+        Content-Type: "application/json"
+      body: "{{ lookup('template','workspace.json') }}"
+      body_format: json
+      return_content: yes
+      validate_certs: no
+      force_basic_auth: yes
+      url_username: "{{ extra_nginx_acm.username }}"
+      url_password: "{{ extra_nginx_acm.password }}"
+      status_code: 201, 202
+    when: var_register.status == 200
+
+- name: Create or Update infrastructure >> workspace >> environment
+  block:
+
+  - name: GET infrastructure >> environment
+    uri:
+      url: "https://{{ extra_nginx_acm.ip }}/api/acm/v1/infrastructure/workspaces/{{ extra_app.name }}{{ extra_volterra_site_id }}/environments/{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment | lower }}"
+      method: GET
+      return_content: yes
+      validate_certs: no
+      force_basic_auth: yes
+      url_username: "{{ extra_nginx_acm.username }}"
+      url_password: "{{ extra_nginx_acm.password }}"
+      status_code: 200, 404
+    register: var_register
+
+  - name: CREATE infrastructure >> workspace >> environment
+    uri:
+      url: "https://{{ extra_nginx_acm.ip }}/api/acm/v1/infrastructure/workspaces/{{ extra_app.name }}{{ extra_volterra_site_id }}/environments"
+      method: POST
+      headers:
+        Content-Type: "application/json"
+      body: "{{ lookup('template', var_environment_template) }}"
+      body_format: json
+      return_content: yes
+      validate_certs: no
+      force_basic_auth: yes
+      url_username: "{{ extra_nginx_acm.username }}"
+      url_password: "{{ extra_nginx_acm.password }}"
+      status_code: 201, 202
+    when: var_register.status == 404
+
+  - name: UPDATE infrastructure >> workspace >> environment
+    uri:
+      url: "https://{{ extra_nginx_acm.ip }}/api/acm/v1/infrastructure/workspaces/{{ extra_app.name }}{{ extra_volterra_site_id }}/environments/{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment | lower }}"
+      method: PUT
+      headers:
+        Content-Type: "application/json"
+      body: "{{ lookup('template', var_environment_template) }}"
+      body_format: json
+      return_content: yes
+      validate_certs: no
+      force_basic_auth: yes
+      url_username: "{{ extra_nginx_acm.username }}"
+      url_password: "{{ extra_nginx_acm.password }}"
+      status_code: 201, 202
+    when: var_register.status == 200
+
+- name: Create or Update infrastructure >> workspace >> devportal
+  block:
+
+  - name: GET infrastructure >> workspace >> devportal
+    uri:
+      url: "https://{{ extra_nginx_acm.ip }}/api/acm/v1/infrastructure/workspaces/{{ extra_app.name }}{{ extra_volterra_site_id }}/devportals/{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment | lower }}-devportal_devportal"
+      method: GET
+      return_content: yes
+      validate_certs: no
+      force_basic_auth: yes
+      url_username: "{{ extra_nginx_acm.username }}"
+      url_password: "{{ extra_nginx_acm.password }}"
+      status_code: 200, 404
+    register: var_register
+
+  - name: CREATE infrastructure >> workspace >> devportal
+    uri:
+      url: "https://{{ extra_nginx_acm.ip }}/api/acm/v1/infrastructure/workspaces/{{ extra_app.name }}{{ extra_volterra_site_id }}/devportals"
+      method: POST
+      headers:
+        Content-Type: "application/json"
+      body: "{{ lookup('template','devportal.json') }}"
+      body_format: json
+      return_content: yes
+      validate_certs: no
+      force_basic_auth: yes
+      url_username: "{{ extra_nginx_acm.username }}"
+      url_password: "{{ extra_nginx_acm.password }}"
+      status_code: 201, 202
+    when: var_register.status == 404
+
+  - name: UPDATE infrastructure >> workspace >> devportal
+    uri:
+      url: "https://{{ extra_nginx_acm.ip }}/api/acm/v1/infrastructure/workspaces/{{ extra_app.name }}{{ extra_volterra_site_id }}/devportals/{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment | lower }}-devportal_devportal"
+      method: PUT
+      headers:
+        Content-Type: "application/json"
+      body: "{{ lookup('template','devportal.json') }}"
+      body_format: json
+      return_content: yes
+      validate_certs: no
+      force_basic_auth: yes
+      url_username: "{{ extra_nginx_acm.username }}"
+      url_password: "{{ extra_nginx_acm.password }}"
+      status_code: 201, 202
+    when: var_register.status == 200
+
+

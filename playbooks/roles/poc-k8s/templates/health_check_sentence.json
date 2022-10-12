@@ -1,0 +1,26 @@
+{
+  "metadata": {
+    "name": "{{ extra_app.name }}-{{ item.name }}",
+    "namespace": "{{ extra_volterra_namespace }}",
+    "labels": {
+      "owner": "{{ extra_owner_email.split('@')[0] }}",
+      "project": "cloudbuilder"
+    },
+    "description": "Cloud App Stack workshop",
+    "disable": false
+  },
+  "spec": {
+    "http_health_check": {
+      "host_header": "{{ extra_app.name }}.{{ extra_app.domain }}",
+      "path": "{{ item.location }}",
+      "use_http2": null,
+      "headers": {},
+      "request_headers_to_remove": null
+    },
+    "timeout": 3,
+    "interval": 15,
+    "unhealthy_threshold": 1,
+    "healthy_threshold": 3,
+    "jitter_percent": 30
+  }
+}

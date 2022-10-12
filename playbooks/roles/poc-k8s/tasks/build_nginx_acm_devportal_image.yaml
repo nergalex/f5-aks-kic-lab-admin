@@ -1,0 +1,71 @@
+---
+- name: INSTALL package
+  package:
+    name:
+      - python3-pip
+      - git
+
+- name: CREATE cert directory
+  file:
+    path: /etc/ssl/nginx/
+    state: directory
+
+- name: COPY NGINX certificate
+  copy:
+    content: "{{ lookup('file', 'nginx-repo.crt') }}"
+    dest: "/etc/ssl/nginx/nginx-repo.crt"
+    mode: '0400'
+
+- name: COPY NGINX key
+  copy:
+    content: "{{ lookup('file', 'nginx-repo.key') }}"
+    dest: "/etc/ssl/nginx/nginx-repo.key"
+    mode: '0400'
+
+- name: CREATE yum repo directory
+  file:
+    path: /etc/yum.repos.d
+    state: directory
+
+- name: CREATE source image directory
+  file:
+    path: /root/source_images/
+    state: directory
+
+- name: FETCH git repo
+  git:
+    repo: https://github.com/nergalex/docker-nginx-acm-agent.git
+    dest: /root/source_images/nginx-agent
+    force: yes
+
+- name: COPY NGINX certificate > build dir
+  copy:
+    content: "{{ lookup('file', 'nginx-repo.crt') }}"
+    dest: /root/source_images/nginx-agent/centos/nginx-developer-portal/nginx-repo.crt
+    mode: '0400'
+
+- name: COPY NGINX key > build dir
+  copy:
+    content: "{{ lookup('file', 'nginx-repo.key') }}"
+    dest: /root/source_images/nginx-agent/centos/nginx-developer-portal/nginx-repo.key
+    mode: '0400'
+
+- name: BUILD image aks
+  shell: "DOCKER_BUILDKIT=1 \
+  docker build \
+  --add-host={{ extra_nginx_acm.fqdn }}:{{ extra_nginx_acm.ip }} \
+  --build-arg CONTROLLER_HOST={{ extra_nginx_acm.fqdn }} \
+  --build-arg INSTANCE_GROUP={{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment }}-devportal \
+  --tag nginx-devportal:{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment }} \
+  --secret id=nginx-crt,src=nginx-repo.crt \
+  --secret id=nginx-key,src=nginx-repo.key \
+  ."
+  args:
+    chdir: /root/source_images/nginx-agent/centos/nginx-developer-portal/
+
+- name: "Artifact for Tower Workflows"
+  set_stats:
+    data:
+      stats_nginx_image_tag: "{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment }}"
+
+...

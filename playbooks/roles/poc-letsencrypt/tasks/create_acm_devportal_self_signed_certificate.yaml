@@ -1,0 +1,69 @@
+- name: INIT var_app
+  set_fact:
+    var_app: []
+    var_san: []
+    var_key_pair: []
+    var_project: cloudbuilder
+
+- name: SET var_app
+  set_fact:
+    var_app:
+      cn: "{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment | lower }}-devportal-internal.{{ extra_app.domain }}"
+      san:
+        - "{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment | lower }}-devportal-internal.{{ extra_app.domain }}"
+
+- name: Create a directory if it does not exist
+  ansible.builtin.file:
+    path: "{{ _letsencrypt_path }}/{{ var_project }}/"
+    state: directory
+    mode: '0700'
+
+- name: OpenSSL - Generate a private Key
+  openssl_privatekey:
+    path: "{{ _letsencrypt_path }}/{{ var_project }}/{{ var_app.cn }}.key"
+    type: "{{ extra_letsencrypt_key_type | default(_letsencrypt_key_type) }}"
+    size: "{{ extra_letsencrypt_key_size | default(_letsencrypt_key_size) }}"
+    state: present
+
+- name: OpenSSL - Generate a CSR
+  openssl_csr:
+    privatekey_path: "{{ _letsencrypt_path }}/{{ var_project }}/{{ var_app.cn }}.key"
+    path: "{{ _letsencrypt_path }}/{{ var_project }}/{{ var_app.cn }}.csr"
+    country_name: "{{ extra_letsencrypt_country_name | default(_letsencrypt_country_name) }}"
+    state_or_province_name: "{{ extra_letsencrypt_state_name | default(_letsencrypt_state_name) }}"
+    locality_name: "{{ extra_letsencrypt_locality_name | default(_letsencrypt_locality_name) }}"
+    organization_name: "{{ extra_letsencrypt_organization_name | default(_letsencrypt_organization_name) }}"
+    organizational_unit_name: "{{ extra_letsencrypt_organizational_unit_name | default(_letsencrypt_organizational_unit_name) }}"
+    common_name: "{{ var_app.cn }}"
+    subject_alt_name: "{{  var_app.san | default([]) | map('regex_replace', '^', 'DNS:') | list }}"
+    email_address: "{{ extra_email_address | default(_letsencrypt_email_address) }}"
+    digest: "{{ extra_letsencrypt_digest | default(_letsencrypt_digest) }}"
+    state: present
+
+- name: OpenSSL - Generate a temporaty CRT for initial challenge
+  openssl_certificate:
+    privatekey_path: "{{ _letsencrypt_path }}/{{ var_project }}/{{ var_app.cn }}.key"
+    csr_path: "{{ _letsencrypt_path }}/{{ var_project }}/{{ var_app.cn }}.csr"
+    path: "{{ _letsencrypt_path }}/{{ var_project }}/{{ var_app.cn }}.crt"
+    provider: selfsigned
+    state: present
+
+- name: GET CRT file
+  ansible.builtin.slurp:
+    src: "{{ _letsencrypt_path }}/{{ var_project }}/{{ var_app.cn }}.crt"
+  register: var_crt_slurp
+
+- name: GET Private Key file
+  ansible.builtin.slurp:
+    src: "{{ _letsencrypt_path }}/{{ var_project }}/{{ var_app.cn }}.key"
+  register: var_key_slurp
+
+- name: Artifact for Tower Workflows
+  set_stats:
+    data:
+      stats_crt:  "{{ var_crt_slurp['content'] | b64decode }}"
+      stats_key:  "{{ var_key_slurp['content'] | b64decode }}"
+
+
+
+

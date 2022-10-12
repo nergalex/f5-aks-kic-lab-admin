@@ -1,0 +1,114 @@
+{
+  "metadata": {
+    "name": "cloudbuilder-{{ var_site_id }}",
+    "namespace": "system",
+    "description": "NGINX workshop",
+    "labels": {
+      "owner": "{{ extra_owner_email.split('@')[0] }}",
+      "project": "{{ var_label_project | default('cloudbuilder') }}"
+    },
+    "disable": false
+  },
+  "spec": {
+    "resource_group": "rg-volterra-{{ var_site_id }}",
+    "azure_region": "{{ extra_azure_region }}",
+    "vnet": {
+      "new_vnet": {
+        "name": "vnet-cloudbuilder-{{ var_site_id }}",
+        "primary_ipv4": "10.201.{{ var_site_id }}.0/24"
+      }
+    },
+    "ingress_egress_gw": {
+      "az_nodes": [
+        {
+          "azure_az": "1",
+          "inside_subnet": {
+            "subnet_param": {
+              "ipv4": "10.201.{{ var_site_id }}.0/25"
+            }
+          },
+          "disk_size": 0,
+          "outside_subnet": {
+            "subnet_param": {
+              "ipv4": "10.201.{{ var_site_id }}.128/25"
+            }
+          }
+        }
+      ],
+      "no_network_policy": {},
+      "forward_proxy_allow_all": {},
+      "azure_certified_hw": "azure-byol-multi-nic-voltmesh",
+      "inside_static_routes": {
+        "static_route_list": [
+          {
+            "custom_static_route": {
+              "subnets": [
+                {
+                  "ipv4": {
+                    "prefix": "10.{{ var_site_id }}.0.0",
+                    "plen": 16
+                  }
+                },
+                {
+                  "ipv4": {
+                    "prefix": "10.200.{{ var_site_id }}.0",
+                    "plen": 24
+                  }
+                },
+                {
+                  "ipv4": {
+                    "prefix": "168.63.129.16",
+                    "plen": 32
+                  }
+                }
+              ],
+              "nexthop": {
+                "type": "NEXT_HOP_USE_CONFIGURED",
+                "nexthop_address": {
+                  "ipv4": {
+                    "addr": "10.201.{{ var_site_id }}.1"
+                  }
+                },
+                "interface": [
+                  {
+                    "kind": "network_interface",
+                    "tenant": "{{ extra_volterra.tenant.full }}",
+                    "namespace": "system",
+                    "name": "ves-io-azure-vnet-site-cloudbuilder-{{ var_site_id }}-inside"
+                  }
+                ]
+              },
+              "labels": {
+                "custom/district": "{{ var_site_id }}"
+              },
+              "attrs": [
+                "ROUTE_ATTR_INSTALL_FORWARDING",
+                "ROUTE_ATTR_INSTALL_HOST"
+              ]
+            }
+          }
+        ]
+      },
+      "no_outside_static_routes": {},
+      "no_global_network": {}
+    },
+    "azure_cred": {
+      "name": "{{ extra_volterra.azure_cred.name }}",
+      "namespace": "system",
+      "tenant": "{{ extra_volterra.tenant.full }}"
+    },
+    "machine_type": "Standard_D4_v2",
+    "disk_size": 0,
+    "volterra_software_version": "",
+    "operating_system_version": "",
+    "ssh_key": "{{ extra_ssh_key }}",
+    "coordinates": {
+      "latitude": {{ var_coordinates[extra_azure_region]['latitude'] }},
+      "longitude": {{ var_coordinates[extra_azure_region]['longitude'] }}
+    },
+    "logs_streaming_disabled": {},
+    "vip_params_per_az": [],
+    "no_worker_nodes": {},
+    "site_to_site_tunnel_ip": ""
+  }
+}

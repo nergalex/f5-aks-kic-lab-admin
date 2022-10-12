@@ -1,0 +1,95 @@
+{
+  "metadata": {
+    "name": "{{ extra_app.name }}-{{ item.name }}",
+    "namespace": "{{ extra_volterra_namespace }}",
+    "labels": {
+      "owner": "{{ extra_owner_email.split('@')[0] }}",
+      "project": "cloudbuilder"
+    },
+    "annotations": {
+      "ves.io/app": "sentence"
+    },
+    "description": "NGINX workshop",
+    "disable": false
+  },
+    "spec": {
+        "service":  {
+            "num_replicas": 1,
+            "containers": [
+                {
+                    "name": "{{ extra_app.name }}-{{ item.name }}",
+                    "image": {
+                        "name": "{{ item.image }}",
+                        "public": {},
+                        "pull_policy": "IMAGE_PULL_POLICY_ALWAYS"
+                    },
+                    "init_container": false,
+                    "flavor": "CONTAINER_FLAVOR_TYPE_TINY"
+                }
+            ],
+            "configuration": {
+                "parameters":
+                [
+                    {
+                        "env_var":
+                        {
+                            "name": "LOGIN_ENABLED",
+                            "value": "true"
+                        }
+                    },
+                    {
+                        "env_var":
+                        {
+                            "name": "LOGIN_TOKEN",
+                            "value": "true"
+                        }
+                    },
+                    {
+                        "env_var":
+                        {
+                            "name": "NAMESPACE",
+                            "value": "{{ extra_volterra_namespace }}"
+                        }
+                    },
+                    {
+                        "env_var":
+                        {
+                            "name": "PREFIX",
+                            "value": "ms"
+                        }
+                    }
+                ]
+            },
+            "deploy_options":
+            {
+                "deploy_ce_virtual_sites":
+                {
+                    "virtual_site":
+                    [
+                        {
+                            "tenant": "{{ extra_volterra.tenant.full }}",
+                            "namespace": "{{ extra_volterra_namespace }}",
+                            "name": "cloudbuilder-landing-zones"
+                        }
+                    ]
+                }
+            },
+            "advertise_options": {
+              "advertise_in_cluster": {
+                "multi_ports": {
+                  "ports": [
+                    {
+                      "name": "http-8080",
+                      "info": {
+                        "port": 8080,
+                        "protocol": "PROTOCOL_HTTP",
+                        "target_port": 8080
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+        }
+    }
+}

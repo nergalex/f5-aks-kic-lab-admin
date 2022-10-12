@@ -1,0 +1,24 @@
+{
+  "metadata": {
+    "name": "{{ stats_acr_login_server  | replace('.', '-') }}",
+    "namespace": "{{ extra_volterra_namespace }}",
+    "labels": {
+      "owner": "{{ extra_owner_email.split('@')[0] }}",
+      "project": "cloudbuilder"
+    },
+    "description": "NGINX workshop",
+    "disable": false
+  },
+  "spec": {
+    "registry": "{{ stats_acr_login_server }}",
+    "user_name": "{{ stats_acr_username }}",
+    "password": {
+      "clear_secret_info": {
+        "url": "string:///{{ stats_acr_password | b64encode }}",
+        "provider": ""
+      },
+      "secret_encoding_type": "EncodingNone"
+    },
+    "email": "{{ extra_owner_email }}"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "action": "{{ var_terraform.action }}",
+  "namespace": "{{ var_terraform.namespace }}",
+  "view_kind": "{{ var_terraform.view_kind }}",
+  "view_name": "{{ var_terraform.view_name }}"
+}

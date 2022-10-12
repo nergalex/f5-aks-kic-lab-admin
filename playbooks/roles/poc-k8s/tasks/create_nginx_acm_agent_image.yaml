@@ -1,0 +1,23 @@
+---
+- name: INSTALL python package Docker
+  pip:
+    name:
+      - docker==5.0.3
+    executable: /usr/local/bin/pip3.10
+
+- name: Log into private registry and force re-authorization
+  community.docker.docker_login:
+    registry: "{{ stats_acr_login_server }}"
+    username: "{{ stats_acr_username }}"
+    password: "{{ stats_acr_password }}"
+    reauthorize: yes
+
+- name: Tag and push to local registry > nginx-agent latest
+  community.docker.docker_image:
+    name: "nginx-agent:{{ stats_nginx_image_tag }}"
+    repository: "{{ stats_acr_login_server }}/nginx-agent"
+    tag: "{{ stats_nginx_image_tag }}"
+    push: yes
+    source: local
+
+...

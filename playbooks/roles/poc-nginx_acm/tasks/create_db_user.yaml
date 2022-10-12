@@ -1,0 +1,19 @@
+---
+- name: COMMON - CREATE PostgreSQL >> User
+  postgresql_query:
+    db: "{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment | lower }}"
+    login_host: nginx-devportal-db.postgres.database.azure.com
+    login_user: cyber@nginx-devportal-db
+    login_password: "{{ extra_nginx_acm.password }}"
+    query: "CREATE USER nginxdm WITH LOGIN PASSWORD 'nginxdm';"
+  ignore_errors: yes
+
+- name: CREATE PostgreSQL >> Grant User
+  postgresql_query:
+    db: "{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment | lower }}"
+    login_host: nginx-devportal-db.postgres.database.azure.com
+    login_user: cyber@nginx-devportal-db
+    login_password: "{{ extra_nginx_acm.password }}"
+    query: 'GRANT ALL PRIVILEGES ON DATABASE "{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment | lower }}" TO nginxdm;'
+
+...

@@ -1,0 +1,19 @@
+---
+- hosts: localhost
+  gather_facts: no
+  tasks:
+  - name: CREATE ansible-playbook in-memory inventory
+    add_host:
+      groups: "vm-jumphost"
+      hostname: "jumphost-{{ extra_jumphost.name }}"
+      ansible_host: "{{ stats_jumphost_ip }}"
+      ansible_port: 22
+      ansible_python_interpreter: /usr/local/bin/python3.10
+
+- hosts: vm-jumphost
+  gather_facts: yes
+  become: true
+  roles:
+    - role: poc-k8s
+
+

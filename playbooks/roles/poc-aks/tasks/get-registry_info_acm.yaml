@@ -1,0 +1,21 @@
+---
+- name: SET variables
+  set_fact:
+    var_platform_name: "aksdistrict{{ extra_aksdistrict_id }}"
+
+- name: GET azure container registry info
+  delegate_to: localhost
+  azure.azcollection.azure_rm_containerregistry_info:
+    name: "{{ var_platform_name }}"
+    resource_group: "rg-{{ var_platform_name }}"
+    retrieve_credentials: yes
+  register: output
+
+- name: "Artifact for Tower Workflows"
+  set_stats:
+    data:
+      stats_acr_login_server:  "{{ output.registries.0.login_server }}"
+      stats_acr_username:  "{{ output.registries.0.credentials.username }}"
+      stats_acr_password:  "{{ output.registries.0.credentials.password }}"
+
+...

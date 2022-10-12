@@ -1,0 +1,39 @@
+---
+- name: CREATE Resource Group
+  delegate_to: localhost
+  azure.azcollection.azure_rm_resourcegroup:
+    name: rg-nginx-devportal-paasdb
+    location: eastus2
+    tags:
+      owner: "{{ extra_owner_email }}"
+      app: cloudbuilder
+      project: nginx-workshop
+
+- name: CREATE PostgreSQL Server
+  azure.azcollection.azure_rm_postgresqlserver:
+    resource_group: rg-nginx-devportal-paasdb
+    name: nginx-devportal-db
+    sku:
+      name: B_Gen5_1
+      tier: Basic
+    location: eastus2
+    storage_mb: 5120
+    version: '11'
+    enforce_ssl: False
+    storage_autogrow: False
+    admin_username: cyber
+    admin_password: "{{ extra_nginx_acm.password }}"
+    tags:
+      owner: "{{ extra_owner_email }}"
+      app: cloudbuilder
+      project: nginx-workshop
+  register: register
+
+- name: CREATE PostgreSQL Database
+  azure.azcollection.azure_rm_postgresqldatabase:
+    resource_group: rg-nginx-devportal-paasdb
+    server_name: nginx-devportal-db
+    name: "{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment | lower }}"
+
+
+...

@@ -1,0 +1,10 @@
+{
+  "name": "{{ extra_app.name }}{{ extra_volterra_site_id }}",
+  "metadata": {
+      "description": "App {{ extra_app.name }} in environment {{ extra_environment }} owned by {{ extra_producer_name }}"
+  },
+  "contactDetails": {
+    "adminEmail": "{{ extra_owner_email }}",
+    "adminName": "{{ extra_producer_name }}"
+  }
+}

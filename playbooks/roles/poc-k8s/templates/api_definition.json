@@ -1,0 +1,22 @@
+{
+  "metadata": {
+    "name": "{{ extra_app.name }}{{ extra_volterra_site_id }}",
+    "namespace": "{{ extra_volterra_namespace }}",
+    "labels": {
+      "owner": "{{ extra_owner_email.split('@')[0] }}",
+      "project": "cloudbuilder"
+    },
+    "description": "NGINX workshop",
+    "disable": false
+  },
+  "spec": {
+    "swagger_specs": [
+      {%- for component in var_register_stored_objects.results -%}
+        {%- if component.json is defined -%}
+          "{{ component.json.metadata.url }}"
+          {%- if not loop.last -%},{% endif %}
+        {%- endif -%}
+      {% endfor -%}
+    ]
+  }
+}

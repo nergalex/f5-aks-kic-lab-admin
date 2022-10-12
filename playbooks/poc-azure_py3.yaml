@@ -1,0 +1,18 @@
+---
+- hosts: localhost
+  gather_facts: no
+  tasks:
+  - name: CREATE ansible-playbook in-memory inventory
+    add_host:
+      groups: localhost-py3
+      hostname: localhost-py3
+      ansible_host: localhost
+      ansible_port: 22
+      ansible_python_interpreter: /opt/custom-envs/cloudbuilder-azure-py3/bin/python
+
+- hosts: localhost-py3
+  connection: local
+  gather_facts: no
+  roles:
+    - { role: azure.azure_preview_modules }
+    - role: poc-azure

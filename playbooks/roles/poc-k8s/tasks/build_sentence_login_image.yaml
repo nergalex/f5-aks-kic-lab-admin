@@ -1,0 +1,22 @@
+---
+- name: CREATE source image directory
+  file:
+    path: /root/source_images/
+    state: directory
+
+- name: FETCH git source images
+  git:
+    repo: "{{ item.repo }}"
+    dest: "/root/source_images/{{ item.name }}-{{ item.version }}"
+    version: "{{ item.version }}"
+    force: yes
+  loop: "{{ extra_app.components }}"
+  when: item.repo is defined
+
+
+
+
+
+
+
+...

@@ -1,11 +1,13 @@
 NGINX workshop - admin guide
 ##############################################################
-Thank you for your interest in *NGINX Ingress Controller workshop*.
-*NGINX Ingress Controller workshop* is a F5 community lab that helps DevSecOps teams manage NGINX Ingress Controller deployments by adding control, visibility and security to their Apps.
+Thank you for your interest in *NGINX workshops*.
+*NGINX workshops* is a F5 community lab that helps:
+    - Architect to better understand benefits and caveats of each design approach,
+    - DevSecOps to manage NGINX components by adding control, visibility and security.
 
 If you are a student, please visit `User guide <https://f5-k8s-ctfd.docs.emea.f5se.com/>`_.
 
-The *NGINX Ingress Controller workshop* Administration Guide documents the administration of the lab platform and each lab through `Red Hat Ansible Tower <https://www.ansible.com/products/tower>`_.
+This *NGINX  workshops* Administration Guide documents deployment and administration of the lab platform.
 
 .. contents:: Contents
     :local:
@@ -14,7 +16,9 @@ Pre-requisites
 *****************************************
 Access to Tower
 =========================================
-- Allow your Public IP address to access Tower: Network security group *nsg-tower* >> rule *https*
+Labs are deployed using `Red Hat Ansible Automation Platform <https://www.redhat.com/en/technologies/management/ansible>`_.
+
+- Allow your Public IP address to access Tower: Network security group *nsg-tower*
 - Connect to `Tower <https://tower-cloudbuilderf5.eastus2.cloudapp.azure.com>`_ using provided credentials
 
 Deployment
@@ -556,15 +560,18 @@ Extra variable                                         Description
           nexthop_k8s_service:
             name: frontend
 
-Lab 6.0 Pre-requisites
+Lab 6.0 - Pre-requisites
 =========================================
     - F5 Distributed Cloud: `Generate API Tokens <https://docs.cloud.f5.com/docs/how-to/user-mgmt/credentials>`_
+    - F5 Distributed Cloud: `Generate Cloud credential <https://docs.cloud.f5.com/docs/how-to/site-management/cloud-credentials>`_ named ``cred-az-cloudbuilder``
     - Okta: `PKCE Setup <https://github.com/nginx-openid-connect/nginx-oidc-core-v2/tree/main/docs/oidc-pkce#pkce-setup-with-okta>`_
 
-Lab 6.1 Deploy ACM infra
+Lab 6.1 - Deploy ACM infrastructure
 =========================================
 Deploy ``Infrastructure`` configuration in NGINX ACM.
 Launch the workflow template ``wf-lab_acm-1_acm_infra`` and fulfill the survey.
+
+Then on Azure UI, open resource ``nginx-devportal-db`` >> ``Connection security`` >> ``Allow access to Azure services`` = ``Yes``
 
 ================================================================   =============================================       =============================================   ================================================   =============================================   =============================================
 Job template                                                       objective                                           playbook                                        activity or play targeted in role                  inventory                                       credential
@@ -607,3 +614,242 @@ Extra variables defined in workflow with example values:
       ip: 1.1.1.1
       password: AdminPassword
       username: admin
+
+Lab 6.2 - Build NGINX images
+=========================================
+Build images of NGINX API GW and NGINX devportal.
+Because ``instance group`` is dynamically configured during nginx-agent installation,
+each image is created per ``instance group``.
+
+Launch the workflow template ``wf-lab_acm-2_build_infra_images`` and fulfill the survey.
+
+================================================================   =============================================       =============================================   ================================================   =============================================   =============================================
+Job template                                                       objective                                           playbook                                        activity or play targeted in role                  inventory                                       credential
+================================================================   =============================================       =============================================   ================================================   =============================================   =============================================
+``poc-aks-get-registry_info_acm``                                  Get ACR login server, username and password         ``playbooks/poc-aks.yaml``                      ``poc-aks-get-registry_info_acm``                  CMP_inv_CloudBuilderf5                          <Service Principal>
+``poc-azure-get-vm-jumphost_acm``                                  Get Public IP of Jumphost                           ``playbooks/poc-azure.yaml``                    ``poc-azure-get-vm-jumphost_acm``                  CMP_inv_CloudBuilderf5                          <Service Principal>
+``poc-k8s-build_nginx_acm_devportal_image``                        Build an image of NGINX devportal                   ``playbooks/poc-k8s_jumphost.yaml``             ``poc-k8s-build_nginx_acm_devportal_image``        localhost                                       f5-k8s-ctfd-jumphost
+``poc-k8s-create_nginx_acm_devportal_image``                       Push image of NGINX devportal to ACR                ``playbooks/poc-k8s_jumphost.yaml``             ``poc-k8s-create_nginx_acm_devportal_image``       localhost                                       f5-k8s-ctfd-jumphost
+``poc-k8s-build_nginx_acm_agent_image``                            Build an image of NGINX API GW                      ``playbooks/poc-k8s_jumphost.yaml``             ``poc-k8s-build_nginx_acm_agent_image``            localhost                                       f5-k8s-ctfd-jumphost
+``poc-k8s-create_nginx_acm_agent_image``                           Push image of NGINX API GW to ACR                   ``playbooks/poc-k8s_jumphost.yaml``             ``poc-k8s-create_nginx_acm_agent_image``           localhost                                       f5-k8s-ctfd-jumphost
+================================================================   =============================================       =============================================   ================================================   =============================================   =============================================
+
+=====================================================  =======================================================================================================
+Extra variable in Survey                               Description
+=====================================================  =======================================================================================================
+``extra_volterra_site_id``                             site ID of student, aka student ID
+``extra_environment``                                  Environment type in ACM infra's workspace: PROD or NON-PROD
+=====================================================  =======================================================================================================
+
+Extra variables defined in workflow with example values:
+
+.. code-block:: yaml
+
+    extra_aksdistrict_id: 3 # site that hosts the jumphost and Azure Container Registry
+    extra_jumphost:
+      name: jumphost
+    extra_nginx_acm:
+      fqdn: acm
+      ip: 1.1.1.1
+      username: admin
+      password: AdminPassword
+    extra_app:
+      name: sentence
+
+Lab 6.3 - Create vK8S
+=========================================
+Launch the workflow template ``wf-lab_acm-3_vk8s_deploy_infra`` and fulfill the survey.
+
+================================================================   =============================================       =============================================   ================================================   =============================================   =============================================
+Job template                                                       objective                                           playbook                                        activity or play targeted in role                  inventory                                       credential
+================================================================   =============================================       =============================================   ================================================   =============================================   =============================================
+``poc-volterra-create_azure_vnet_site_acm``                        Create CE Tooling + CE Application                  ``poc-volterra.yaml``                           ``poc-volterra-create_azure_vnet_site_acm``        localhost
+``poc-aks-get-registry_info_acm``                                  Get ACR login server, username and password         ``playbooks/poc-aks.yaml``                      ``poc-aks-get-registry_info_acm``                  CMP_inv_CloudBuilderf5                          <Service Principal>
+``poc-volterra-create_vk8s_acm``                                   Create vK8S                                         ``poc-volterra.yaml``                           ``poc-volterra-create_azure_vnet_site_acm``        localhost
+``poc-volterra-publish_acm_agent_devportal``                       Deploy NGINX API GW + devportal                     ``poc-volterra.yaml``                           ``poc-volterra-create_azure_vnet_site_acm``        localhost
+================================================================   =============================================       =============================================   ================================================   =============================================   =============================================
+
+=====================================================  =======================================================================================================
+Extra variable in Survey                               Description
+=====================================================  =======================================================================================================
+``extra_volterra_site_id``                             site ID of student, aka student ID
+``extra_azure_region``                                 name of the targeted Azure region: eastus2 or francecentral
+``extra_environment``                                  Environment type in ACM infra's workspace: PROD or NON-PROD
+``extra_namespace``                                    Namespace in F5 XC. If 'auto' then name is auto created using extra_app.name
+``extra_owner_email``                                  App owner's e-mail address
+=====================================================  =======================================================================================================
+
+Extra variables defined in workflow with example values:
+
+.. code-block:: yaml
+
+    extra_aksdistrict_id: 3 # site that hosts Azure Container Registry
+    extra_app:
+      name: sentence
+      domain: f5dc.dev
+    extra_nginx_acm:
+      fqdn: acm
+      ip: 1.1.1.1
+      site_id: 0 # site that hosts NGINX Management Suite server
+    extra_volterra:
+      tenant:
+        full: XXX-YYY
+        short: XXX
+      token: ZZZ
+      azure_cred:
+        name: cred-az-cloudbuilder
+    extra_ssh_key: "ssh-rsa XXX" # SSH public key authorized on F5 XC Customer Edge
+
+Lab 6.4 - Update vK8S resources
+=========================================
+Launch the workflow template ``wf-lab_acm-4_vk8s_update_infra`` and fulfill the survey.
+
+================================================================   =============================================       =============================================   ================================================   =============================================   =============================================
+Job template                                                       objective                                           playbook                                        activity or play targeted in role                  inventory                                       credential
+================================================================   =============================================       =============================================   ================================================   =============================================   =============================================
+``poc-aks-get-registry_info_acm``                                  Get ACR login server, username and password         ``playbooks/poc-aks.yaml``                      ``poc-aks-get-registry_info_acm``                  CMP_inv_CloudBuilderf5                          <Service Principal>
+``poc-k8s-vk8s_update_nginx_agent_devportal``                      Update NGINX Agent and Devportal                    ``playbooks/poc-k8s_jumphost.yaml``             ``poc-k8s-vk8s_update_nginx_agent_devportal``      localhost                                       f5-k8s-ctfd-jumphost
+================================================================   =============================================       =============================================   ================================================   =============================================   =============================================
+
+=====================================================  =======================================================================================================
+Extra variable in Survey                               Description
+=====================================================  =======================================================================================================
+``extra_volterra_site_id``                             site ID of student, aka student ID
+``extra_azure_region``                                 name of the targeted Azure region: eastus2 or francecentral
+``extra_environment``                                  Environment type in ACM infra's workspace: PROD or NON-PROD
+``extra_kubeconfig``                                   vK8S kubeconfig in YAML format
+``extra_owner_email``                                  App owner's e-mail address
+=====================================================  =======================================================================================================
+
+Extra variables defined in workflow with example values:
+
+.. code-block:: yaml
+
+    extra_aksdistrict_id: 3 # site that hosts Azure Container Registry
+    extra_app:
+      name: sentence
+      domain: f5dc.dev
+    extra_nginx_acm:
+      fqdn: acm
+      ip: 1.1.1.1
+      site_id: 0 # site that hosts NGINX Management Suite server
+    extra_volterra:
+      tenant:
+        full: XXX-YYY
+        short: XXX
+      token: ZZZ
+      azure_cred:
+        name: cred-az-cloudbuilder
+
+Lab 6.5 - Deploy ACM Service
+=========================================
+Launch the workflow template ``wf-lab_acm-5-acm_services`` and fulfill the survey.
+
+================================================================   =============================================       =============================================   ================================================   =============================================   =============================================
+Job template                                                       objective                                           playbook                                        activity or play targeted in role                  inventory                                       credential
+================================================================   =============================================       =============================================   ================================================   =============================================   =============================================
+``poc-nginx_acm-create_services``                                  Create ACM service's workspace                      ``playbooks/poc-nginx_acm.yaml``                ``create_services``                                localhost
+================================================================   =============================================       =============================================   ================================================   =============================================   =============================================
+
+=====================================================  =======================================================================================================
+Extra variable in Survey                               Description
+=====================================================  =======================================================================================================
+``extra_volterra_site_id``                             site ID of student, aka student ID
+``extra_producer_name``                                Owner's name of ACM infra's workspace
+``extra_owner_email``                                  Owner's e-mail of ACM infra's workspace
+``extra_environment``                                  Environment type in ACM infra's workspace: PROD or NON-PROD
+=====================================================  =======================================================================================================
+
+Extra variables defined in workflow with example values:
+
+.. code-block:: yaml
+
+    extra_nginx_acm:
+      ip: 1.1.1.1
+      password: AdminPassword
+      username: admin
+    extra_app:
+      name: sentence
+      domain: f5dc.dev
+      components:
+        - name: adjectives
+          openapi: >-
+            https://raw.githubusercontent.com/nergalex/f5-nap-policies/master/policy/open-api-files/sentence-adjectives.yaml
+        - name: animals
+          openapi: >-
+            https://raw.githubusercontent.com/nergalex/f5-nap-policies/master/policy/open-api-files/sentence-animals.yaml
+        - name: colors
+          openapi: >-
+            https://raw.githubusercontent.com/nergalex/f5-nap-policies/master/policy/open-api-files/sentence-colors.yaml
+        - name: locations
+          openapi: >-
+            https://raw.githubusercontent.com/nergalex/f5-nap-policies/master/policy/open-api-files/sentence-locations.yaml
+
+Lab 6.6 - Deploy Sentence app
+=========================================
+Launch the workflow template ``wf-lab_acm-6_vk8s-app_sentence_login`` and fulfill the survey.
+
+================================================================   =============================================       =============================================   ================================================   =============================================   =============================================
+Job template                                                       objective                                           playbook                                        activity or play targeted in role                  inventory                                       credential
+================================================================   =============================================       =============================================   ================================================   =============================================   =============================================
+``poc-aks-get-registry_info_acm``                                  Get ACR login server, username and password         ``playbooks/poc-aks.yaml``                      ``poc-aks-get-registry_info_acm``                  CMP_inv_CloudBuilderf5                          <Service Principal>
+``poc-azure-get-vm-jumphost_acm``                                  Get Public IP of Jumphost                           ``playbooks/poc-azure.yaml``                    ``poc-azure-get-vm-jumphost_acm``                  CMP_inv_CloudBuilderf5                          <Service Principal>
+``poc-k8s-build_sentence_login_image``                             Build Sentence MS images                            ``playbooks/poc-k8s_jumphost.yaml``             ``poc-k8s-build_sentence_login_image``             localhost                                       f5-k8s-ctfd-jumphost
+``poc-k8s-create_sentence_login_image``                            Push Sentence MS images to ACR                      ``playbooks/poc-k8s_jumphost.yaml``             ``poc-k8s-create_sentence_login_image``            localhost                                       f5-k8s-ctfd-jumphost
+``poc-volterra-create_app_sentence_login``                         Deploy Sentence MS in vK8S                          ``poc-volterra.yaml``                           ``poc-volterra-create_app_sentence_login``         localhost
+``poc-volterra-publish_app_sentence_login``                        Publish Sentence MS on Internet                     ``poc-volterra.yaml``                           ``poc-volterra-publish_app_sentence_login``        localhost
+
+================================================================   =============================================       =============================================   ================================================   =============================================   =============================================
+
+=====================================================  =======================================================================================================
+Extra variable in Survey                               Description
+=====================================================  =======================================================================================================
+``extra_volterra_site_id``                             site ID of student, aka student ID
+``extra_namespace``                                    Namespace in F5 XC. If 'auto' then name is auto created using extra_app.name
+``extra_environment``                                  Environment type in ACM infra's workspace: PROD or NON-PROD
+``extra_owner_email``                                  App owner's e-mail address
+=====================================================  =======================================================================================================
+
+Extra variables defined in workflow with example values:
+
+.. code-block:: yaml
+
+    extra_aksdistrict_id: 3
+    extra_app:
+      domain: f5dc.dev
+      name: sentence
+      components:
+        - name: generator
+          location: /api/sentence
+          repo: 'https://github.com/nergalex/generator.git'
+          version: development
+        - name: frontend
+          location: /
+          repo: 'https://github.com/nergalex/sentence-frontend-acm.git'
+          version: development
+        - name: adjectives
+          location: /adjectives
+          image: 'registry.gitlab.com/sentence-app/adjectives:latest'
+          openapi: https://raw.githubusercontent.com/nergalex/f5-nap-policies/master/policy/open-api-files/sentence-adjectives.yaml
+        - name: animals
+          location: /animals
+          image: 'registry.gitlab.com/sentence-app/animals:latest'
+          openapi: https://raw.githubusercontent.com/nergalex/f5-nap-policies/master/policy/open-api-files/sentence-animals.yaml
+        - name: backgrounds
+          location: /backgrounds
+          image: 'registry.gitlab.com/sentence-app/backgrounds:latest'
+        - name: colors
+          location: /colors
+          image: 'registry.gitlab.com/sentence-app/colors:latest'
+          openapi: https://raw.githubusercontent.com/nergalex/f5-nap-policies/master/policy/open-api-files/sentence-colors.yaml
+        - name: locations
+          location: /locations
+          image: 'registry.gitlab.com/sentence-app/locations:latest'
+          openapi: https://raw.githubusercontent.com/nergalex/f5-nap-policies/master/policy/open-api-files/sentence-locations.yaml
+    extra_volterra:
+      token: ZZZ
+      tenant:
+        short: XXX
+        full: XXX-ZZZ
+    extra_jumphost:
+      name: jumphost

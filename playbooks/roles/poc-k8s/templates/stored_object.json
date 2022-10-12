@@ -1,0 +1,7 @@
+{
+  "name": "{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ item.name }}",
+  "namespace": "{{ extra_volterra_namespace }}",
+  "object_type": "swagger",
+  "bytes_value": "{{ lookup('url', item.openapi, split_lines=False, force=True) | from_yaml | to_json | b64encode }}"
+
+}

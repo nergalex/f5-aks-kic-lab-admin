@@ -1,0 +1,66 @@
+{
+    "name": "{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment | lower }}",
+    "type": "{{ extra_environment }}",
+    "metadata": {
+        "description": "{{ extra_app.name }}{{ extra_volterra_site_id }} {{ extra_environment }}"
+    },
+    "systemProperties": {
+        "acmHostName": "acm"
+    },
+    "functions": [
+        "DEVPORTAL",
+        "API-GATEWAY"
+    ],
+    "proxies": [
+        {
+            "hostnames": [
+                "{{ extra_producer_name }}-{{ extra_app.name }}-{{ extra_environment | lower }}.{{ extra_app.domain }}"
+            ],
+            "proxyClusterName": "{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment | lower }}",
+            "runtime": "GATEWAY-PROXY",
+            "policies": {
+                "tls-inbound": [
+                    {
+                        "data": {
+                            "serverCerts": [
+                                {
+                                    "key": "{%- for line in extra_alexis_sentence_non_prod_key.split('\n') -%}{{ line }}\n{%- endfor -%}",
+                                    "cert": "{%- for line in extra_alexis_sentence_non_prod_crt.split('\n') -%}{{ line }}\n{%- endfor -%}"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "hostnames": [
+                "{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment | lower }}-devportal.{{ extra_app.domain }}"
+            ],
+            "proxyClusterName": "{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment | lower }}-devportal",
+            "runtime": "PORTAL-PROXY",
+            "policies": {
+                "tls-inbound": [
+                    {
+                        "data": {
+                            "serverCerts": [
+                                {
+                                    "key": "{%- for line in extra_alexis_sentence_non_prod_devportal_key.split('\n') -%}{{ line }}\n{%- endfor -%}",
+                                    "cert": "{%- for line in extra_alexis_sentence_non_prod_devportal_crt.split('\n') -%}{{ line }}\n{%- endfor -%}"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "hostnames": [
+                "{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment | lower }}-devportal-internal.{{ extra_app.domain }}"
+            ],
+            "proxyClusterName": "{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment | lower }}-devportal",
+            "runtime": "INT-PORTAL-ACM-PROXY",
+            "policies": {}
+        }
+    ]
+}

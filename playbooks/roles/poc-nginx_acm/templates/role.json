@@ -1,0 +1,33 @@
+{
+    "metadata":
+    {
+        "displayName": "Producer",
+        "name": "producer-{{ extra_app.name }}{{ extra_volterra_site_id }}",
+        "description": "App owner {{ extra_app.name }}{{ extra_volterra_site_id }}"
+    },
+    "roleDef":
+    {
+        "permissions":
+        [
+            {
+                "accessTypes":
+                [
+                    "READ",
+                    "CREATE",
+                    "UPDATE",
+                    "DELETE"
+                ],
+                "feature": "SERVICE-WORKSPACE",
+                "objects":
+                [
+                  {
+                    "resource": "Systems",
+                    "values": [
+                      "All"
+                    ]
+                  }
+                ]
+            }
+        ]
+    }
+}

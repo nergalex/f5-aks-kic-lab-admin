@@ -1,0 +1,89 @@
+{
+  "metadata": {
+    "name": "{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_env }}-devportal{{ item }}",
+    "namespace": "{{ extra_volterra_namespace }}",
+    "labels": {
+      "owner": "{{ extra_owner_email.split('@')[0] }}",
+      "project": "cloudbuilder"
+    },
+    "description": "NGINX workshop",
+    "disable": false
+  },
+  "spec": {
+    "domains": [
+      "{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_env }}-devportal{{ item }}.{{ extra_app.domain }}"
+    ],
+    "https_auto_cert": {
+      "http_redirect": true,
+      "add_hsts": true,
+      "no_mtls": {},
+      "tls_config": {
+        "default_security": {}
+      },
+      "default_header": {},
+      "enable_path_normalize": {}
+    },
+    "advertise_on_public_default_vip": {},
+    "default_route_pools": [],
+    "routes": [
+        {
+          "redirect_route": {
+            "http_method": "GET",
+            "path": {
+              "path": "/v1/theme"
+            },
+            "headers": [],
+            "route_redirect": {
+              "proto_redirect": "incoming-proto",
+              "host_redirect": "{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_env }}-devportal{{ item }}.{{ extra_app.domain }}",
+              "path_redirect": "/v1/theme/",
+              "response_code": 301,
+              "retain_all_params": {}
+            }
+          }
+        },
+        {
+          "simple_route": {
+            "http_method": "ANY",
+            "path": {
+              "prefix": "/"
+            },
+            "origin_pools": [
+                {
+                  "pool": {
+                    "tenant": "{{ extra_volterra.tenant.full }}",
+                    "namespace": "{{ extra_volterra_namespace }}",
+                    "name": "{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_env }}-devportal{{ item }}"
+                  },
+                  "weight": 1,
+                  "priority": 1,
+                  "endpoint_subsets": {}
+                }
+            ],
+            "disable_host_rewrite": {}
+          }
+        }
+    ],
+    "app_firewall": {
+      "tenant": "{{ extra_volterra.tenant.full }}",
+      "namespace": "{{ extra_volterra_namespace }}",
+      "name": "devportal"
+    },
+    "add_location": false,
+    "no_challenge": {},
+    "user_id_client_ip": {},
+    "disable_rate_limit": {},
+    "waf_exclusion_rules": [],
+    "blocked_clients": [],
+    "trusted_clients": [],
+    "ddos_mitigation_rules": [],
+    "service_policies_from_namespace": {},
+    "cookie_stickiness": {
+      "name": "xc-session"
+    },
+    "multi_lb_app": {},
+    "disable_bot_defense": {},
+    "host_name": "",
+    "dns_info": []
+  }
+}

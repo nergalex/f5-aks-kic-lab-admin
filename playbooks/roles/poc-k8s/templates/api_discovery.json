@@ -1,0 +1,31 @@
+{
+  "metadata": {
+    "name": "cloudbuilder",
+    "namespace": "shared",
+    "labels": {
+      "owner": "{{ extra_owner_email.split('@')[0] }}",
+      "project": "cloudbuilder"
+    },
+    "description": "Cloud App Stack workshop",
+    "disable": false
+  },
+  "spec": {
+    "features": [
+      {
+        "type": "BUSINESS_LOGIC_MARKUP"
+      },
+      {
+        "type": "PER_REQ_ANOMALY_DETECTION"
+      },
+      {
+        "type": "TIMESERIES_ANOMALY_DETECTION"
+      },
+      {
+        "type": "USER_BEHAVIOR_ANALYSIS"
+      }
+    ],
+    "business_logic_markup_setting": {
+      "enable": {}
+    }
+  }
+}

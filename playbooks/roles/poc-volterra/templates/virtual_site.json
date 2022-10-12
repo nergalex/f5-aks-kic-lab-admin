@@ -1,0 +1,18 @@
+{
+  "metadata": {
+    "name": "cloudbuilder-landing-zones",
+    "namespace": "{{ extra_volterra_namespace }}",
+    "labels": {
+      "owner": "{{ extra_owner_email.split('@')[0] }}",
+      "project": "cloudbuilder"
+    },
+    "description": "NGINX workshop",
+    "disable": false
+  },
+  "spec": {
+    "site_type": "CUSTOMER_EDGE",
+    "site_selector": {
+      "expressions": ["project in (cloudbuilder)"]
+    }
+  }
+}

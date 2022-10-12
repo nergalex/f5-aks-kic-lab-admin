@@ -1,0 +1,306 @@
+- name: set var NameSpace Auto
+  set_fact:
+    extra_volterra_namespace: "{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment }}"
+  when: extra_namespace == 'auto'
+
+- name: set var NameSpace Defined
+  set_fact:
+    extra_volterra_namespace: "{{ extra_namespace }}"
+  when: extra_namespace != 'auto'
+
+- name: set variables
+  set_fact:
+    var_devportal_hostname_suffixes:
+      - ""
+      - "-internal"
+
+- name: Create or Update Health Check devportal
+  block:
+
+    - name: GET Health Check devportal
+      uri:
+        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/healthchecks/{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment }}-devportal"
+        method: GET
+        headers:
+          Content-Type: application/json
+          Authorization: "APIToken {{ extra_volterra.token }}"
+        status_code: 200, 404, 409
+        validate_certs: no
+      register: var_register
+
+    - name: CREATE Health Check devportal
+      uri:
+        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/healthchecks"
+        method: POST
+        headers:
+          Content-Type: application/json
+          Authorization: "APIToken {{ extra_volterra.token }}"
+        body: "{{ lookup('template','health_check_acm_devportal.json') }}"
+        body_format: json
+        status_code: 200
+        validate_certs: no
+      when: var_register.status == 404
+
+    - name: UPDATE Health Check devportal
+      uri:
+        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/healthchecks/{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment }}-devportal"
+        method: PUT
+        headers:
+          Content-Type: application/json
+          Authorization: "APIToken {{ extra_volterra.token }}"
+        body: "{{ lookup('template','health_check_acm_devportal.json') }}"
+        body_format: json
+        status_code: 200
+        validate_certs: no
+      when: var_register.status == 200
+
+- name: Create or Update Health Check API GW
+  block:
+
+    - name: GET Health Check API GW
+      uri:
+        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/healthchecks/{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment }}-apigw"
+        method: GET
+        headers:
+          Content-Type: application/json
+          Authorization: "APIToken {{ extra_volterra.token }}"
+        status_code: 200, 404, 409
+        validate_certs: no
+      register: var_register
+
+    - name: CREATE Health Check API GW
+      uri:
+        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/healthchecks"
+        method: POST
+        headers:
+          Content-Type: application/json
+          Authorization: "APIToken {{ extra_volterra.token }}"
+        body: "{{ lookup('template','health_check_acm_apigw.json') }}"
+        body_format: json
+        status_code: 200
+        validate_certs: no
+      when: var_register.status == 404
+
+    - name: UPDATE Health Check API GW
+      uri:
+        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/healthchecks/{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment }}-apigw"
+        method: PUT
+        headers:
+          Content-Type: application/json
+          Authorization: "APIToken {{ extra_volterra.token }}"
+        body: "{{ lookup('template','health_check_acm_apigw.json') }}"
+        body_format: json
+        status_code: 200
+        validate_certs: no
+      when: var_register.status == 200
+
+- name: Create or Update Origin Pool devportal Public
+  block:
+
+    - name: GET Origin Pool devportal Public
+      uri:
+        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/origin_pools/{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment }}-devportal"
+        method: GET
+        headers:
+          Content-Type: application/json
+          Authorization: "APIToken {{ extra_volterra.token }}"
+        status_code: 200, 404
+        validate_certs: no
+      register: var_register
+
+    - name: CREATE Origin Pool devportal Public
+      uri:
+        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/origin_pools"
+        method: POST
+        headers:
+          Content-Type: application/json
+          Authorization: "APIToken {{ extra_volterra.token }}"
+        body: "{{ lookup('template','origin_pool_acm_devportal.json') }}"
+        body_format: json
+        status_code: 200
+        validate_certs: no
+      when: var_register.status == 404
+
+    - name: UPDATE Origin Pool devportal Public
+      uri:
+        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/origin_pools/{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment }}-devportal"
+        method: PUT
+        headers:
+          Content-Type: application/json
+          Authorization: "APIToken {{ extra_volterra.token }}"
+        body: "{{ lookup('template','origin_pool_acm_devportal.json') }}"
+        body_format: json
+        status_code: 200
+        validate_certs: no
+      when: var_register.status == 200
+
+- name: Create or Update Origin Pool devportal Private
+  block:
+
+    - name: GET Origin Pool devportal Private
+      uri:
+        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/origin_pools/{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment }}-devportal-internal"
+        method: GET
+        headers:
+          Content-Type: application/json
+          Authorization: "APIToken {{ extra_volterra.token }}"
+        status_code: 200, 404
+        validate_certs: no
+      register: var_register
+
+    - name: CREATE Origin Pool devportal Private
+      uri:
+        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/origin_pools"
+        method: POST
+        headers:
+          Content-Type: application/json
+          Authorization: "APIToken {{ extra_volterra.token }}"
+        body: "{{ lookup('template','origin_pool_acm_devportal-internal.json') }}"
+        body_format: json
+        status_code: 200
+        validate_certs: no
+      when: var_register.status == 404
+
+    - name: UPDATE Origin Pool devportal Private
+      uri:
+        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/origin_pools/{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment }}-devportal-internal"
+        method: PUT
+        headers:
+          Content-Type: application/json
+          Authorization: "APIToken {{ extra_volterra.token }}"
+        body: "{{ lookup('template','origin_pool_acm_devportal-internal.json') }}"
+        body_format: json
+        status_code: 200
+        validate_certs: no
+      when: var_register.status == 200
+
+- name: Create or Update Origin Pool API GW
+  block:
+
+    - name: GET Origin Pool API GW
+      uri:
+        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/origin_pools/{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment }}-apigw"
+        method: GET
+        headers:
+          Content-Type: application/json
+          Authorization: "APIToken {{ extra_volterra.token }}"
+        status_code: 200, 404
+        validate_certs: no
+      register: var_register
+
+    - name: CREATE Origin Pool API GW
+      uri:
+        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/origin_pools"
+        method: POST
+        headers:
+          Content-Type: application/json
+          Authorization: "APIToken {{ extra_volterra.token }}"
+        body: "{{ lookup('template','origin_pool_acm_apigw.json') }}"
+        body_format: json
+        status_code: 200
+        validate_certs: no
+      when: var_register.status == 404
+
+    - name: UPDATE Origin Pool API GW
+      uri:
+        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/origin_pools/{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment }}-apigw"
+        method: PUT
+        headers:
+          Content-Type: application/json
+          Authorization: "APIToken {{ extra_volterra.token }}"
+        body: "{{ lookup('template','origin_pool_acm_apigw.json') }}"
+        body_format: json
+        status_code: 200
+        validate_certs: no
+      when: var_register.status == 200
+
+- name: Create or Update HTTP App Firewall devportal
+  block:
+
+    - name: GET HTTP App Firewall devportal
+      uri:
+        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/app_firewalls/devportal"
+        method: GET
+        headers:
+          Content-Type: application/json
+          Authorization: "APIToken {{ extra_volterra.token }}"
+        status_code: 200, 404
+        validate_certs: no
+      register: var_register
+
+    - name: CREATE HTTP App Firewall devportal
+      uri:
+        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/app_firewalls"
+        method: POST
+        headers:
+          Content-Type: application/json
+          Authorization: "APIToken {{ extra_volterra.token }}"
+        body: "{{ lookup('template','app_firewall_acm_devportal.json') }}"
+        body_format: json
+        status_code: 200
+        validate_certs: no
+      when: var_register.status == 404
+
+    - name: UPDATE HTTP App Firewall devportal
+      uri:
+        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/app_firewalls/devportal"
+        method: PUT
+        headers:
+          Content-Type: application/json
+          Authorization: "APIToken {{ extra_volterra.token }}"
+        body: "{{ lookup('template','app_firewall_acm_devportal.json') }}"
+        body_format: json
+        status_code: 200
+        validate_certs: no
+      when: var_register.status == 200
+
+- name: Create or Update HTTP LB devportal
+  block:
+
+    - name: GET HTTP LB devportal
+      uri:
+        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/http_loadbalancers/{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment }}-devportal{{ item }}"
+        method: GET
+        headers:
+          Content-Type: application/json
+          Authorization: "APIToken {{ extra_volterra.token }}"
+        status_code: 200, 404
+        validate_certs: no
+      register: var_register
+      loop: "{{ var_devportal_hostname_suffixes }}"
+
+    - name: CREATE HTTP LB devportal
+      uri:
+        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/http_loadbalancers"
+        method: POST
+        headers:
+          Content-Type: application/json
+          Authorization: "APIToken {{ extra_volterra.token }}"
+        body: "{{ lookup('template','http_lb_acm_devportal.json') }}"
+        body_format: json
+        status_code: 200
+        validate_certs: no
+      when: var_register.results[cur_index].status == 404
+      loop: "{{ var_devportal_hostname_suffixes }}"
+      loop_control:
+        index_var: cur_index
+
+    - name: UPDATE HTTP LB devportal
+      uri:
+        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/http_loadbalancers/{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment }}-devportal{{ item }}"
+        method: PUT
+        headers:
+          Content-Type: application/json
+          Authorization: "APIToken {{ extra_volterra.token }}"
+        body: "{{ lookup('template','http_lb_acm_devportal.json') }}"
+        body_format: json
+        status_code: 200
+        validate_certs: no
+      when: var_register.results[cur_index].status == 200
+      loop: "{{ var_devportal_hostname_suffixes }}"
+      loop_control:
+        index_var: cur_index
+
+
+
+

@@ -1,0 +1,224 @@
+- name: Create or Update services >> workspace
+  block:
+
+  - name: GET services >> workspace
+    uri:
+      url: "https://{{ extra_nginx_acm.ip }}/api/acm/v1/services/workspaces/{{ extra_app.name }}{{ extra_volterra_site_id }}"
+      method: GET
+      return_content: yes
+      validate_certs: no
+      force_basic_auth: yes
+      url_username: "{{ extra_nginx_acm.username }}"
+      url_password: "{{ extra_nginx_acm.password }}"
+      status_code: 200, 404
+    register: var_register
+
+  - name: CREATE services >> workspace
+    uri:
+      url: "https://{{ extra_nginx_acm.ip }}/api/acm/v1/services/workspaces"
+      method: POST
+      headers:
+        Content-Type: "application/json"
+      body: "{{ lookup('template','workspace_service.json') }}"
+      body_format: json
+      return_content: yes
+      validate_certs: no
+      force_basic_auth: yes
+      url_username: "{{ extra_nginx_acm.username }}"
+      url_password: "{{ extra_nginx_acm.password }}"
+      status_code: 201, 202
+    when: var_register.status == 404
+
+  - name: UPDATE services >> workspace
+    uri:
+      url: "https://{{ extra_nginx_acm.ip }}/api/acm/v1/services/workspaces/{{ extra_app.name }}{{ extra_volterra_site_id }}"
+      method: PUT
+      headers:
+        Content-Type: "application/json"
+      body: "{{ lookup('template','workspace_service.json') }}"
+      body_format: json
+      return_content: yes
+      validate_certs: no
+      force_basic_auth: yes
+      url_username: "{{ extra_nginx_acm.username }}"
+      url_password: "{{ extra_nginx_acm.password }}"
+      status_code: 201, 202
+    when: var_register.status == 200
+
+- name: Create or Update services >> workspace >> api doc
+  block:
+
+  - name: GET services >> workspace >> api doc
+    uri:
+      url: "https://{{ extra_nginx_acm.ip }}/api/acm/v1/services/workspaces/{{ extra_app.name }}{{ extra_volterra_site_id }}/api-docs/{{ item.name }}-0-1"
+      method: GET
+      return_content: yes
+      validate_certs: no
+      force_basic_auth: yes
+      url_username: "{{ extra_nginx_acm.username }}"
+      url_password: "{{ extra_nginx_acm.password }}"
+      status_code: 200, 404
+    register: var_register
+    loop: "{{ extra_app.components }}"
+
+  - name: CREATE services >> workspace >> api doc
+    uri:
+      url: "https://{{ extra_nginx_acm.ip }}/api/acm/v1/services/workspaces/{{ extra_app.name }}{{ extra_volterra_site_id }}/api-docs"
+      method: POST
+      headers:
+        Content-Type: "application/json"
+      body: "{{ lookup('url', item.openapi, split_lines=False, force=True) | from_yaml }}"
+      body_format: json
+      return_content: yes
+      validate_certs: no
+      force_basic_auth: yes
+      url_username: "{{ extra_nginx_acm.username }}"
+      url_password: "{{ extra_nginx_acm.password }}"
+      status_code: 201, 202
+    loop: "{{ extra_app.components }}"
+    loop_control:
+      index_var: cur_index
+      pause: 2
+    when: var_register.results[cur_index].status == 404
+
+  - name: UPDATE services >> workspace >> api doc
+    uri:
+      url: "https://{{ extra_nginx_acm.ip }}/api/acm/v1/services/workspaces/{{ extra_app.name }}{{ extra_volterra_site_id }}/api-docs/{{ item.name }}-0-1"
+      method: PUT
+      headers:
+        Content-Type: "application/json"
+      body: "{{ lookup('url', item.openapi, split_lines=False, force=True) | from_yaml }}"
+      body_format: json
+      return_content: yes
+      validate_certs: no
+      force_basic_auth: yes
+      url_username: "{{ extra_nginx_acm.username }}"
+      url_password: "{{ extra_nginx_acm.password }}"
+      status_code: 200, 201, 202
+    loop: "{{ extra_app.components }}"
+    loop_control:
+      index_var: cur_index
+      pause: 2
+    when: var_register.results[cur_index].status == 200
+
+### ISSUE wrong GET response body > CREATE ONLY
+- name: Create or Update services >> workspace >> api proxy
+  block:
+
+#  - name: GET services >> workspace >> api proxy
+#    uri:
+#      url: "https://{{ extra_nginx_acm.ip }}/api/acm/v1/services/workspaces/{{ extra_app.name }}{{ extra_volterra_site_id }}/proxies/{{ item.name }}-{{ extra_environment | lower }}"
+#      method: GET
+#      return_content: yes
+#      validate_certs: no
+#      force_basic_auth: yes
+#      url_username: "{{ extra_nginx_acm.username }}"
+#      url_password: "{{ extra_nginx_acm.password }}"
+#      status_code: 200, 404
+#    register: var_register
+#    loop: "{{ extra_app.components }}"
+#    when: item.name not in ['colors']
+
+  - name: CREATE services >> workspace >> api proxy
+    uri:
+      url: "https://{{ extra_nginx_acm.ip }}/api/acm/v1/services/workspaces/{{ extra_app.name }}{{ extra_volterra_site_id }}/proxies"
+      method: POST
+      headers:
+        Content-Type: "application/json"
+      body: "{{ lookup('template','proxy.json') }}"
+      body_format: json
+      return_content: yes
+      validate_certs: no
+      force_basic_auth: yes
+      url_username: "{{ extra_nginx_acm.username }}"
+      url_password: "{{ extra_nginx_acm.password }}"
+      status_code: 202
+    loop: "{{ extra_app.components }}"
+    loop_control:
+      index_var: cur_index
+      pause: 10
+    # when: item.name not in ['colors'] and var_register.results[cur_index].json._links | length == 0
+    when: item.name not in ['colors']
+
+#  - name: UPDATE services >> workspace >> api proxy
+#    uri:
+#      url: "https://{{ extra_nginx_acm.ip }}/api/acm/v1/services/workspaces/{{ extra_app.name }}{{ extra_volterra_site_id }}/proxies/{{ item.name }}-{{ extra_environment | lower }}"
+#      method: PUT
+#      headers:
+#        Content-Type: "application/json"
+#      body: "{{ lookup('template','proxy.json') }}"
+#      body_format: json
+#      return_content: yes
+#      validate_certs: no
+#      force_basic_auth: yes
+#      url_username: "{{ extra_nginx_acm.username }}"
+#      url_password: "{{ extra_nginx_acm.password }}"
+#      status_code: 200, 201, 202
+#    loop: "{{ extra_app.components }}"
+#    loop_control:
+#      index_var: cur_index
+#      pause: 10
+#    when: item.name not in ['colors'] and var_register.results[cur_index].json._links | length > 0
+
+### ISSUE wrong GET response body > CREATE ONLY
+- name: Create or Update services >> workspace >> api proxy + API Key verification
+  block:
+
+#  - name: GET services >> workspace >> api proxy + API Key verification
+#    uri:
+#      url: "https://{{ extra_nginx_acm.ip }}/api/acm/v1/services/workspaces/{{ extra_app.name }}{{ extra_volterra_site_id }}/proxies/{{ item.name }}-{{ extra_environment | lower }}"
+#      method: GET
+#      return_content: yes
+#      validate_certs: no
+#      force_basic_auth: yes
+#      url_username: "{{ extra_nginx_acm.username }}"
+#      url_password: "{{ extra_nginx_acm.password }}"
+#      status_code: 200, 404
+#    register: var_register
+#    loop: "{{ extra_app.components }}"
+#    when: item.name in ['colors']
+
+  - name: CREATE services >> workspace >> api proxy + API Key verification
+    uri:
+      url: "https://{{ extra_nginx_acm.ip }}/api/acm/v1/services/workspaces/{{ extra_app.name }}{{ extra_volterra_site_id }}/proxies"
+      method: POST
+      headers:
+        Content-Type: "application/json"
+      body: "{{ lookup('template','proxy_api_key.json') }}"
+      body_format: json
+      return_content: yes
+      validate_certs: no
+      force_basic_auth: yes
+      url_username: "{{ extra_nginx_acm.username }}"
+      url_password: "{{ extra_nginx_acm.password }}"
+      status_code: 202
+    loop: "{{ extra_app.components }}"
+    loop_control:
+      index_var: cur_index
+      pause: 10
+    # when: item.name in ['colors'] and var_register.results[cur_index].json._links | length == 0
+    when: item.name in ['colors']
+
+#  - name: UPDATE services >> workspace >> api proxy + API Key verification
+#    uri:
+#      url: "https://{{ extra_nginx_acm.ip }}/api/acm/v1/services/workspaces/{{ extra_app.name }}{{ extra_volterra_site_id }}/proxies/{{ item.name }}-{{ extra_environment | lower }}"
+#      method: PUT
+#      headers:
+#        Content-Type: "application/json"
+#      body: "{{ lookup('template','proxy_api_key.json') }}"
+#      body_format: json
+#      return_content: yes
+#      validate_certs: no
+#      force_basic_auth: yes
+#      url_username: "{{ extra_nginx_acm.username }}"
+#      url_password: "{{ extra_nginx_acm.password }}"
+#      status_code: 200, 201, 202
+#    loop: "{{ extra_app.components }}"
+#    loop_control:
+#      index_var: cur_index
+#      pause: 10
+#    when: item.name in ['colors'] and var_register.results[cur_index].json._links | length > 0
+
+
+
+

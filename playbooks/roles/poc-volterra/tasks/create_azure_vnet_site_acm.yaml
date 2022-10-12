@@ -1,0 +1,208 @@
+- name: set variables
+  set_fact:
+    var_coordinates:
+      francecentral:
+        latitude: 48.83356164667687
+        longitude: 2.265720547322662
+      eastus2:
+        latitude: 36.67787056454724
+        longitude: -78.37707631001022
+
+- name: Create or Update Forward Proxy Policy
+  block:
+
+  - name: GET Forward Proxy Policy
+    uri:
+      url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/system/forward_proxy_policys/cloudbuilder"
+      method: GET
+      headers:
+        Content-Type: application/json
+        Authorization: "APIToken {{ extra_volterra.token }}"
+      status_code: 200, 404
+    register: var_register
+
+  - name: CREATE Forward Proxy Policy
+    uri:
+      url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/system/forward_proxy_policys"
+      method: POST
+      headers:
+        Content-Type: application/json
+        Authorization: "APIToken {{ extra_volterra.token }}"
+      body: "{{ lookup('template','forward_proxy_policy.json') }}"
+      body_format: json
+      status_code: 200
+    when: var_register.status == 404
+
+  - name: UPDATE Forward Proxy Policy
+    uri:
+      url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/system/forward_proxy_policys/cloudbuilder"
+      method: PUT
+      headers:
+        Content-Type: application/json
+        Authorization: "APIToken {{ extra_volterra.token }}"
+      body: "{{ lookup('template','forward_proxy_policy.json') }}"
+      body_format: json
+      status_code: 200
+    when: var_register.status == 200
+
+- name: set variables Tooling
+  set_fact:
+    var_label_project: tooling
+    var_site_id: 0
+
+- name: Create or Update Site Tooling
+  block:
+
+  - name: GET Site Tooling
+    uri:
+      url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/system/azure_vnet_sites/cloudbuilder-{{ var_site_id }}"
+      method: GET
+      headers:
+        Content-Type: application/json
+        Authorization: "APIToken {{ extra_volterra.token }}"
+      status_code: 200, 404
+      validate_certs: no
+    register: var_register
+
+  - name: CREATE Site Tooling
+    uri:
+      url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/system/azure_vnet_sites"
+      method: POST
+      headers:
+        Content-Type: application/json
+        Authorization: "APIToken {{ extra_volterra.token }}"
+      body: "{{ lookup('template','azure_vnet_site.json') }}"
+      body_format: json
+      status_code: 200
+      validate_certs: no
+    when: var_register.status == 404
+
+  - name: UPDATE Site Tooling
+    uri:
+      url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/system/azure_vnet_sites/cloudbuilder-{{ var_site_id }}"
+      method: PUT
+      headers:
+        Content-Type: application/json
+        Authorization: "APIToken {{ extra_volterra.token }}"
+      body: "{{ lookup('template','azure_vnet_site.json') }}"
+      body_format: json
+      status_code: 200
+      validate_certs: no
+    when: var_register.status == 200
+
+- name: set var_terraform Tooling
+  set_fact:
+    var_terraform:
+      action: APPLY
+      namespace: system
+      view_kind: azure_vnet_site
+      view_name: "cloudbuilder-{{ var_site_id }}"
+
+- name: DEPLOY site Tooling
+  uri:
+    url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/terraform/namespaces/system/terraform/{{ var_terraform.view_kind }}/{{ var_terraform.view_name }}/run"
+    method: POST
+    headers:
+      Content-Type: application/json
+      Authorization: "APIToken {{ extra_volterra.token }}"
+    body: "{{ lookup('template','terraform_action.json') }}"
+    body_format: json
+    status_code: 200
+    validate_certs: no
+  register: output
+
+- name: GET deployment status Tooling
+  uri:
+    url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/system/terraform_parameters/{{ var_terraform.view_kind }}/{{ var_terraform.view_name }}/status"
+    method: GET
+    headers:
+      Authorization: "APIToken {{ extra_volterra.token }}"
+    status_code: 200
+    validate_certs: no
+  register: output
+  until: "output.json.status.apply_status.apply_state is defined and output.json.status.apply_status.apply_state == 'APPLIED'"
+  retries: 20
+  delay: 30
+
+- name: set variables App hosting
+  set_fact:
+    var_label_project: cloudbuilder
+    var_site_id: "{{ extra_volterra_site_id }}"
+
+- name: Create or Update Site App hosting
+  block:
+
+  - name: GET Site App hosting
+    uri:
+      url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/system/azure_vnet_sites/cloudbuilder-{{ var_site_id }}"
+      method: GET
+      headers:
+        Content-Type: application/json
+        Authorization: "APIToken {{ extra_volterra.token }}"
+      status_code: 200, 404
+      validate_certs: no
+    register: var_register
+
+  - name: CREATE Site App hosting
+    uri:
+      url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/system/azure_vnet_sites"
+      method: POST
+      headers:
+        Content-Type: application/json
+        Authorization: "APIToken {{ extra_volterra.token }}"
+      body: "{{ lookup('template','azure_vnet_site.json') }}"
+      body_format: json
+      status_code: 200
+      validate_certs: no
+    when: var_register.status == 404
+
+  - name: UPDATE Site App hosting
+    uri:
+      url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/system/azure_vnet_sites/cloudbuilder-{{ var_site_id }}"
+      method: PUT
+      headers:
+        Content-Type: application/json
+        Authorization: "APIToken {{ extra_volterra.token }}"
+      body: "{{ lookup('template','azure_vnet_site.json') }}"
+      body_format: json
+      status_code: 200
+      validate_certs: no
+    when: var_register.status == 200
+
+- name: set var_terraform App hosting
+  set_fact:
+    var_terraform:
+      action: APPLY
+      namespace: system
+      view_kind: azure_vnet_site
+      view_name: "cloudbuilder-{{ var_site_id }}"
+
+- name: DEPLOY site App hosting
+  uri:
+    url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/terraform/namespaces/system/terraform/{{ var_terraform.view_kind }}/{{ var_terraform.view_name }}/run"
+    method: POST
+    headers:
+      Content-Type: application/json
+      Authorization: "APIToken {{ extra_volterra.token }}"
+    body: "{{ lookup('template','terraform_action.json') }}"
+    body_format: json
+    status_code: 200
+    validate_certs: no
+  register: output
+
+- name: GET deployment status App hosting
+  uri:
+    url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/system/terraform_parameters/{{ var_terraform.view_kind }}/{{ var_terraform.view_name }}/status"
+    method: GET
+    headers:
+      Authorization: "APIToken {{ extra_volterra.token }}"
+    status_code: 200
+    validate_certs: no
+  register: output
+  until: "output.json.status.apply_status.apply_state is defined and output.json.status.apply_status.apply_state == 'APPLIED'"
+  retries: 20
+  delay: 30
+
+
+
+

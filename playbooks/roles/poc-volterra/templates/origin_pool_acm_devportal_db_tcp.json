@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "name": "nginx-devportal-db-tcp",
+    "namespace": "{{ extra_volterra_namespace }}",
+    "labels": {
+      "owner": "{{ extra_owner_email.split('@')[0] }}",
+      "project": "cloudbuilder"
+    },
+    "description": "NGINX workshop, PaaS DB",
+    "disable": false
+  },
+  "spec": {
+    "origin_servers": [
+      {
+        "private_name": {
+          "dns_name": "nginx-devportal-db.postgres.database.azure.com",
+          "site_locator": {
+            "site": {
+              "tenant": "{{ extra_volterra.tenant.full }}",
+              "namespace": "system",
+              "name": "cloudbuilder-{{ extra_nginx_acm.site_id }}"
+            }
+          },
+          "outside_network": {}
+        },
+        "labels": {}
+      }
+    ],
+    "no_tls": {},
+    "port": 5432,
+    "same_as_endpoint_port": {},
+    "healthcheck": [],
+    "loadbalancer_algorithm": "LB_OVERRIDE",
+    "endpoint_selection": "LOCAL_PREFERRED"
+  }
+}
