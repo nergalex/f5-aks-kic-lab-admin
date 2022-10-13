@@ -565,6 +565,7 @@ Lab 6.0 - Pre-requisites
     - F5 Distributed Cloud: `Generate API Tokens <https://docs.cloud.f5.com/docs/how-to/user-mgmt/credentials>`_
     - F5 Distributed Cloud: `Generate Cloud credential <https://docs.cloud.f5.com/docs/how-to/site-management/cloud-credentials>`_ named ``cred-az-cloudbuilder``
     - Okta: `PKCE Setup <https://github.com/nginx-openid-connect/nginx-oidc-core-v2/tree/main/docs/oidc-pkce#pkce-setup-with-okta>`_
+    - NMS + ACM installed + fix here deployed `PKCE Setup <https://docs.nginx.com/nginx-management-suite/acm/releases/known-issues/#35630>`_
 
 Lab 6.1 - Deploy ACM infrastructure
 =========================================
