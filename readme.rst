@@ -560,12 +560,43 @@ Extra variable                                         Description
           nexthop_k8s_service:
             name: frontend
 
-Lab 6.0 - Pre-requisites
+Lab 6.0 - Deploy sites
 =========================================
+Pre-requisites:
     - F5 Distributed Cloud: `Generate API Tokens <https://docs.cloud.f5.com/docs/how-to/user-mgmt/credentials>`_
     - F5 Distributed Cloud: `Generate Cloud credential <https://docs.cloud.f5.com/docs/how-to/site-management/cloud-credentials>`_ named ``cred-az-cloudbuilder``
     - Okta: `PKCE Setup <https://github.com/nginx-openid-connect/nginx-oidc-core-v2/tree/main/docs/oidc-pkce#pkce-setup-with-okta>`_
     - NMS + ACM installed + fix `here <https://docs.nginx.com/nginx-management-suite/acm/releases/known-issues/#35630>`_ deployed
+
+Deploy Customer Edges that will hosts Apps for all students.
+Launch the workflow template ``wf-lab_acm-0_vk8s_deploy_sites`` and fulfill the survey.
+
+================================================================   =============================================       =============================================   ================================================   =============================================   =============================================
+Job template                                                       objective                                           playbook                                        activity or play targeted in role                  inventory                                       credential
+================================================================   =============================================       =============================================   ================================================   =============================================   =============================================
+``poc-volterra-create_azure_vnet_site_acm``                        Create CE Tooling + CE Application                  ``poc-volterra.yaml``                           ``poc-volterra-create_azure_vnet_site_acm``        localhost
+================================================================   =============================================       =============================================   ================================================   =============================================   =============================================
+
+=====================================================  =======================================================================================================
+Extra variable in Survey                               Description
+=====================================================  =======================================================================================================
+``extra_volterra_site_id``                             site ID of student, aka student ID
+``extra_azure_region``                                 name of the targeted Azure region: eastus2 or francecentral
+``extra_owner_email``                                  App owner's e-mail address
+=====================================================  =======================================================================================================
+
+Extra variables defined in workflow with example values:
+
+.. code-block:: yaml
+
+    extra_volterra:
+      tenant:
+        full: XXX-YYY
+        short: XXX
+      token: ZZZ
+      azure_cred:
+        name: cred-az-cloudbuilder
+    extra_ssh_key: "ssh-rsa XXX" # SSH public key authorized on F5 XC Customer Edge
 
 Lab 6.1 - Deploy ACM infrastructure
 =========================================
@@ -664,7 +695,6 @@ Launch the workflow template ``wf-lab_acm-3_vk8s_deploy_infra`` and fulfill the 
 ================================================================   =============================================       =============================================   ================================================   =============================================   =============================================
 Job template                                                       objective                                           playbook                                        activity or play targeted in role                  inventory                                       credential
 ================================================================   =============================================       =============================================   ================================================   =============================================   =============================================
-``poc-volterra-create_azure_vnet_site_acm``                        Create CE Tooling + CE Application                  ``poc-volterra.yaml``                           ``poc-volterra-create_azure_vnet_site_acm``        localhost
 ``poc-aks-get-registry_info_acm``                                  Get ACR login server, username and password         ``playbooks/poc-aks.yaml``                      ``poc-aks-get-registry_info_acm``                  CMP_inv_CloudBuilderf5                          <Service Principal>
 ``poc-volterra-create_vk8s_acm``                                   Create vK8S                                         ``poc-volterra.yaml``                           ``poc-volterra-create_azure_vnet_site_acm``        localhost
 ``poc-volterra-publish_acm_agent_devportal``                       Deploy NGINX API GW + devportal                     ``poc-volterra.yaml``                           ``poc-volterra-create_azure_vnet_site_acm``        localhost
@@ -673,11 +703,8 @@ Job template                                                       objective    
 =====================================================  =======================================================================================================
 Extra variable in Survey                               Description
 =====================================================  =======================================================================================================
-``extra_volterra_site_id``                             site ID of student, aka student ID
-``extra_azure_region``                                 name of the targeted Azure region: eastus2 or francecentral
 ``extra_environment``                                  Environment type in ACM infra's workspace: PROD or NON-PROD
 ``extra_namespace``                                    Namespace in F5 XC. If 'auto' then name is auto created using extra_app.name
-``extra_owner_email``                                  App owner's e-mail address
 =====================================================  =======================================================================================================
 
 Extra variables defined in workflow with example values:
@@ -699,7 +726,6 @@ Extra variables defined in workflow with example values:
       token: ZZZ
       azure_cred:
         name: cred-az-cloudbuilder
-    extra_ssh_key: "ssh-rsa XXX" # SSH public key authorized on F5 XC Customer Edge
 
 Lab 6.4 - Update vK8S resources
 =========================================
