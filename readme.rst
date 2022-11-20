@@ -567,7 +567,7 @@ Pre-requisites:
     - F5 Distributed Cloud: `Generate Cloud credential <https://docs.cloud.f5.com/docs/how-to/site-management/cloud-credentials>`_ named ``cred-az-cloudbuilder``
     - Okta: `PKCE Setup <https://github.com/nginx-openid-connect/nginx-oidc-core-v2/tree/main/docs/oidc-pkce#pkce-setup-with-okta>`_
     - NMS + ACM installed + fix `here <https://docs.nginx.com/nginx-management-suite/acm/releases/known-issues/#35630>`_ deployed
-
+    - ACM: `Enable Creating Credentials on the Developer Portal <https://docs.nginx.com/nginx-management-suite/acm/how-to/enable-create-credentials/>`_
 Deploy Customer Edges that will hosts Apps for all students.
 Launch the workflow template ``wf-lab_acm-0_vk8s_deploy_sites`` and fulfill the survey.
 
