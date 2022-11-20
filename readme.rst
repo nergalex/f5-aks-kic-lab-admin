@@ -643,7 +643,7 @@ Extra variables defined in workflow with example values:
           client_id: xxx
           server_id: xxx
     extra_nginx_acm:
-      ip: 1.1.1.1
+      ip: acm
       password: AdminPassword
       username: admin
 
