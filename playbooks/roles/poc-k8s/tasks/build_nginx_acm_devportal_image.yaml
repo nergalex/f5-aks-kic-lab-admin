@@ -50,7 +50,19 @@
     dest: /root/source_images/nginx-agent/centos/nginx-developer-portal/nginx-repo.key
     mode: '0400'
 
-- name: BUILD image aks
+- name: COPY NMS certificate > build dir
+  copy:
+    content: "{{ lookup('file', 'nginx-mgmt-suite-trial.crt') }}"
+    dest: /root/source_images/nginx-agent/centos/nginx-developer-portal/nginx-mgmt-suite-trial.crt
+    mode: '0400'
+
+- name: COPY NMS key > build dir
+  copy:
+    content: "{{ lookup('file', 'nginx-mgmt-suite-trial.key') }}"
+    dest: /root/source_images/nginx-agent/centos/nginx-developer-portal/nginx-mgmt-suite-trial.key
+    mode: '0400'
+
+- name: BUILD image
   shell: "DOCKER_BUILDKIT=1 \
   docker build \
   --add-host={{ extra_nginx_acm.fqdn }}:{{ extra_nginx_acm.ip }} \
@@ -59,6 +71,8 @@
   --tag nginx-devportal:{{ extra_app.name }}{{ extra_volterra_site_id }}-{{ extra_environment }} \
   --secret id=nginx-crt,src=nginx-repo.crt \
   --secret id=nginx-key,src=nginx-repo.key \
+  --secret id=nms-crt,src=nginx-mgmt-suite-trial.crt \
+  --secret id=nms-key,src=nginx-mgmt-suite-trial.key \
   ."
   args:
     chdir: /root/source_images/nginx-agent/centos/nginx-developer-portal/
