@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ item.name }}"
+  namespace: "{{ extra_volterra_namespace }}"
+  labels:
+    owner: "{{ extra_owner_email.split('@')[0] }}"
+    project: cloudbuilder
+  annotations:
+    ves.io/app: malware-analysis
+    ves.io/virtual-sites: "{{ extra_volterra_namespace }}/cloudbuilder-landing-zones"
+    ves.io/workload-flavor-{{ item.name }}: opswat-md-core
+spec:
+  replicas: {{ item.replicas }}
+  selector:
+    matchLabels:
+      ves.io/workload: "{{ item.name }}"
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+  revisionHistoryLimit: 10
+  progressDeadlineSeconds: 600
+  template:
+    metadata:
+      labels:
+        ves.io/workload: "{{ item.name }}"
+    spec:
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 180
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      schedulerName: default-scheduler
+      containers:
+        - name: "{{ item.name }}"
+          image: "{{ item.image }}"
+          env:
+            - name: REST_PORT
+              value: "{{ chart_values.MDCORE_REST_PORT }}"
+            - name: DB_MODE
+              value: "{{ chart_values.MDCORE_DB_MODE }}"
+            - name: DB_TYPE
+              value: "{{ chart_values.MDCORE_DB_TYPE }}"
+            - name: DB_HOST
+              value: "{{ chart_values.MDCORE_DB_HOST }}"
+            - name: DB_PORT
+              value: "{{ chart_values.MDCORE_DB_PORT }}"
+            - name: ACTIVATION_SERVER
+              value: "{{ chart_values.activation_server }}"
+            - name: CERT_PATH
+              value: "{{ chart_values.MDCORE_CERT_PATH }}"
+            - name: MD_USER
+              valueFrom:
+                secretKeyRef:
+                  name: md-cred
+                  key: user
+            - name: MD_PWD
+              valueFrom:
+                secretKeyRef:
+                  name: md-cred
+                  key: password
+            - name: MD_INSTANCE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: APIKEY
+              valueFrom:
+                secretKeyRef:
+                  name: md-api-key
+                  key: value
+            - name: LICENSE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ item.name }}-license-key"
+                  key: value
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: md-postgres-cred
+                  key: user
+            - name: DB_PWD
+              valueFrom:
+                secretKeyRef:
+                  name: md-postgres-cred
+                  key: password
+#          livenessProbe:
+#            httpGet:
+#              path: /readyz
+#              port: 8008
+#              scheme: HTTP
+#            initialDelaySeconds: 30
+#            timeoutSeconds: 10
+#            periodSeconds: 10
+#            successThreshold: 1
+#            failureThreshold: 3
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: Always
+

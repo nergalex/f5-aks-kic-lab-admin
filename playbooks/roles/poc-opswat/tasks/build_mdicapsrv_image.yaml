@@ -1,0 +1,41 @@
+---
+- name: INSTALL package
+  package:
+    name:
+      - python3-pip
+      - git
+
+- name: CREATE source image directory
+  file:
+    path: /root/source_images/
+    state: directory
+
+- name: FETCH git repo
+  git:
+    repo: https://github.com/nergalex/docker-nginx-opswat.git
+    dest: /root/source_images/nginx-opswat
+    force: yes
+
+- name: COPY OPSWAT package > build dir
+  copy:
+    content: "{{ lookup('file', 'mdicapsrv-feature_http_protocol_for_nginx_module.deb') }}"
+    dest: /root/source_images/nginx-opswat/debian/opswat-mdicapsrv/mdicapsrv-feature_http_protocol_for_nginx_module.deb
+    mode: '0400'
+
+- name: BUILD image
+  shell: "DOCKER_BUILDKIT=1 \
+  docker build \
+  --tag opswat-mdicapsrv:{{ extra_namespace }} \
+  ."
+  #   --build-arg VERSION=4.13.0 \
+  args:
+    chdir: /root/source_images/nginx-opswat/debian/opswat-mdicapsrv/
+
+- name: "Artifact for Tower Workflows"
+  set_stats:
+    data:
+      stats_mdicapsrv_image_tag: "{{ extra_namespace }}"
+
+
+
+...

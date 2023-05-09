@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-agent
+  namespace: "{{ extra_volterra_namespace }}"
+  labels:
+    owner: "{{ extra_owner_email.split('@')[0] }}"
+    project: cloudbuilder
+  annotations:
+    ves.io/app: malware-analysis
+    ves.io/workload-flavor: ves-io-tiny
+    ves.io/workload-flavor-nginx-agent: tiny
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      ves.io/workload: nginx-agent
+  template:
+    metadata:
+      labels:
+        ves.io/workload: nginx-agent
+    spec:
+      terminationGracePeriodSeconds: 120
+      containers:
+        - name: nginx-agent
+          image: "{{ stats_acr_login_server }}/nginx-opswat:{{ extra_namespace }}"
+          env:
+            - name: ENV_CONTROLLER_INSTANCE_GROUP
+              value: "{{ extra_namespace }}"
+            - name: ENV_CONTROLLER_HOST
+              value: "{{ extra_nginx_nms.fqdn }}"
+            - name: ENV_CONTROLLER_USER
+              valueFrom:
+                secretKeyRef:
+                  name: nms-credential
+                  key: username
+            - name: ENV_CONTROLLER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: nms-credential
+                  key: password
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: Always
+      restartPolicy: Always
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      imagePullSecrets:
+        - name: "nginx-agent-{{ stats_acr_login_server  | replace('.', '-') }}"
+      schedulerName: default-scheduler
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  revisionHistoryLimit: 10
+  progressDeadlineSeconds: 600

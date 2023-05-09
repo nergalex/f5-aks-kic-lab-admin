@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "name": "{{ extra_fqdn_demo | replace('.', '-') }}",
+    "namespace": "{{ extra_volterra_namespace }}",
+    "labels": {
+      "owner": "{{ extra_owner_email.split('@')[0] }}",
+      "project": "cloudbuilder"
+    },
+    "description": "NGINX workshop",
+    "disable": false
+  },
+  "spec": {
+    "origin_servers": [
+      {
+        "private_name": {
+          "dns_name": "{{ extra_fqdn_demo }}",
+          "site_locator": {
+            "virtual_site": {
+              "tenant": "{{ extra_volterra.tenant.full }}",
+              "namespace": "{{ extra_volterra_namespace }}",
+              "name": "cloudbuilder-landing-zones",
+              "kind": "virtual_site"
+            }
+          },
+          "outside_network": {}
+        },
+        "labels": {}
+      }
+    ],
+    "use_tls": {
+      "use_host_header_as_sni": {},
+      "tls_config": {
+        "default_security": {}
+      },
+      "volterra_trusted_ca": {},
+      "no_mtls": {}
+    },
+    "port": 443,
+    "same_as_endpoint_port": {},
+    "healthcheck": [],
+    "loadbalancer_algorithm": "LB_OVERRIDE",
+    "endpoint_selection": "LOCAL_PREFERRED"
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "metadata": {
+    "name": "paas-db",
+    "namespace": "{{ extra_volterra_namespace }}",
+    "labels": {
+      "owner": "{{ extra_owner_email.split('@')[0] }}",
+      "project": "cloudbuilder"
+    },
+    "description": "NGINX workshop",
+    "disable": false
+  },
+  "spec": {
+    "domains": [
+      "paas-db"
+    ],
+    "listen_port": 5432,
+    "with_sni": false,
+    "dns_volterra_managed": false,
+    "origin_pools": [],
+    "origin_pools_weights": [
+      {
+        "pool": {
+          "tenant": "{{ extra_volterra.tenant.full }}",
+          "namespace": "{{ extra_volterra_namespace }}",
+          "name": "paas-db-tcp"
+        },
+        "weight": 1,
+        "priority": 1,
+        "endpoint_subsets": {}
+      }
+    ],
+    "advertise_custom": {
+      "advertise_where": [
+        {
+          "virtual_site": {
+            "network": "SITE_NETWORK_SERVICE",
+            "virtual_site": {
+              "tenant": "{{ extra_volterra.tenant.full }}",
+              "namespace": "{{ extra_volterra_namespace }}",
+              "name": "cloudbuilder-landing-zones",
+              "kind": "virtual_site"
+            }
+          },
+          "use_default_port": {}
+        }
+      ]
+    },
+    "hash_policy_choice_round_robin": {},
+    "idle_timeout": 3600000,
+    "retract_cluster": {},
+    "host_name": "",
+    "dns_info": []
+  }
+}

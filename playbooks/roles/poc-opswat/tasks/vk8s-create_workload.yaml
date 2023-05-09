@@ -1,0 +1,453 @@
+- name: set var NameSpace
+  set_fact:
+    extra_volterra_namespace: "{{ extra_namespace }}"
+
+- name: MD components settings
+  set_fact:
+    chart_values:
+      app_name: "{{ extra_namespace }}"             # Application name, it also sets the namespace on all created resources and replaces `<APP_NAME>` in the ingress host (if the ingress is enabled)
+      components:
+        - name: md-icapsrv
+          image:
+            type: private
+            name: opswat-mdicapsrv                  # Overrides the default docker image for the MD ICAP Server service, this value can be changed if you want to set a different version of MD ICAP Server
+          replicas: 1                               # Sets the number of replicas if you want to have multiple MD ICAP Server instances
+          ports:
+            - port: 8048                            # UI + API REST port to expose for the MD ICAP Server pod
+            - port: 8080                            # NGINX module port
+            # - port: 1344                          # ICAP port to expose for the MD ICAP Server pod
+            # - port: 11344                         # ICAPS port to expose for the MD ICAP Server pod
+          livenessProbe:
+            port: 8048
+#        - name: md-core
+#          image:
+#            type: public
+#            name: opswat/metadefendercore-debian:5.2.1               # Overrides the default docker image for the MD ICAP Server service, this value can be changed if you want to set a different version of MD ICAP Server
+#          replicas: 1                                                   # Sets the number of replicas if you want to have multiple MD ICAP Server instances
+#          ports:
+#            - port: 8008                            # UI + REST port to expose for the MD CORE Server pod
+#          livenessProbe:
+#            port: 8008
+
+- name: Create or Update Workload OPSWAT MD components
+  block:
+
+    - name: GET Workload OPSWAT MD components
+      uri:
+        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/workloads/{{ item.name }}"
+        method: GET
+        headers:
+          Content-Type: application/json
+          Authorization: "APIToken {{ extra_volterra.token }}"
+        status_code: 200, 404
+        validate_certs: no
+      loop: "{{ chart_values.components }}"
+      register: var_register
+
+    - name: CREATE Workload OPSWAT MD components
+      uri:
+        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/workloads"
+        method: POST
+        headers:
+          Content-Type: application/json
+          Authorization: "APIToken {{ extra_volterra.token }}"
+        body: "{{ lookup('template','workload_md.json') }}"
+        body_format: json
+        status_code: 200
+        validate_certs: no
+      loop: "{{ chart_values.components }}"
+      loop_control:
+        index_var: cur_index
+      when: var_register.results[cur_index].status == 404
+
+    - name: UPDATE Workload OPSWAT MD components
+      uri:
+        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/workloads/{{ item.name }}"
+        method: PUT
+        headers:
+          Content-Type: application/json
+          Authorization: "APIToken {{ extra_volterra.token }}"
+        body: "{{ lookup('template','workload_md.json') }}"
+        body_format: json
+        status_code: 200
+        validate_certs: no
+      loop: "{{ chart_values.components }}"
+      loop_control:
+        index_var: cur_index
+      when: var_register.results[cur_index].status == 200
+
+#- name: Create or Update Health Check OPSWAT REST
+#  block:
+#
+#    - name: GET Health Check OPSWAT - REST
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/healthchecks/md-liveness-probe"
+#        method: GET
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        status_code: 200, 404, 409
+#        validate_certs: no
+#      register: var_register
+#
+#    - name: CREATE Health Check OPSWAT - REST
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/healthchecks"
+#        method: POST
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        body: "{{ lookup('template','health_check_md.json') }}"
+#        body_format: json
+#        status_code: 200
+#        validate_certs: no
+#      when: var_register.status == 404
+#
+#    - name: UPDATE Health Check OPSWAT - REST
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/healthchecks/md-liveness-probe"
+#        method: PUT
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        body: "{{ lookup('template','health_check_md.json') }}"
+#        body_format: json
+#        status_code: 200
+#        validate_certs: no
+#      when: var_register.status == 200
+#
+#- name: Create or Update origin pool OPSWAT MD components - REST
+#  block:
+#
+#    - name: GET origin pool OPSWAT MD components - REST
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/origin_pools/{{ item.name }}-rest-{{ item.ports.0.port }}"
+#        method: GET
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        status_code: 200, 404
+#        validate_certs: no
+#      loop: "{{ chart_values.components }}"
+#      register: var_register
+#
+#    - name: CREATE origin pool OPSWAT MD components - REST
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/origin_pools"
+#        method: POST
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        body: "{{ lookup('template','origin_pool_md.json') }}"
+#        body_format: json
+#        status_code: 200
+#        validate_certs: no
+#      loop: "{{ chart_values.components }}"
+#      loop_control:
+#        index_var: cur_index
+#      when: var_register.results[cur_index].status == 404
+#
+#    - name: UPDATE origin pool OPSWAT MD components - REST
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/{{ item.name }}-rest-{{ item.ports.0.port }}"
+#        method: PUT
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        body: "{{ lookup('template','origin_pool_md.json') }}"
+#        body_format: json
+#        status_code: 200
+#        validate_certs: no
+#      loop: "{{ chart_values.components }}"
+#      loop_control:
+#        index_var: cur_index
+#      when: var_register.results[cur_index].status == 200
+#
+#- name: Create or Update origin pool OPSWAT MD ICAP - NGINX service
+#  block:
+#
+#    - name: GET origin pool OPSWAT MD ICAP - NGINX service
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/origin_pools/md-icapsrv-nginx-8080"
+#        method: GET
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        status_code: 200, 404
+#        validate_certs: no
+#      register: var_register
+#
+#    - name: CREATE origin pool OPSWAT MD ICAP - NGINX service
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/origin_pools"
+#        method: POST
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        body: "{{ lookup('template','origin_pool_mdicapsrv-8080.json') }}"
+#        body_format: json
+#        status_code: 200
+#        validate_certs: no
+#      when: var_register.status == 404
+#
+#    - name: UPDATE origin pool OPSWAT MD ICAP - NGINX service
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/origin_pools/md-icapsrv-nginx-8080"
+#        method: PUT
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        body: "{{ lookup('template','origin_pool_mdicapsrv-8080.json') }}"
+#        body_format: json
+#        status_code: 200
+#        validate_certs: no
+#      when: var_register.status == 200
+#
+#- name: Create or Update TCP LB OPSWAT MD CORE
+#  block:
+#
+#    - name: GET TCP LB OPSWAT MD CORE
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/tcp_loadbalancers/md-core-rest-8008"
+#        method: GET
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        status_code: 200, 404
+#        validate_certs: no
+#      register: var_register
+#
+#    - name: CREATE TCP LB OPSWAT MD CORE
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/tcp_loadbalancers"
+#        method: POST
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        body: "{{ lookup('template','tcp_lb_mdcore-8008.json') }}"
+#        body_format: json
+#        status_code: 200
+#        validate_certs: no
+#      when: var_register.status == 404
+#
+#    - name: UPDATE TCP LB OPSWAT MD CORE
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/tcp_loadbalancers/md-core-rest-8008"
+#        method: PUT
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        body: "{{ lookup('template','tcp_lb_mdcore-8008.json') }}"
+#        body_format: json
+#        status_code: 200
+#        validate_certs: no
+#      when: var_register.status == 200
+#
+#- name: Create or Update TCP LB OPSWAT MD ICAP - NGINX service
+#  block:
+#
+#    - name: GET TCP LB OPSWAT MD components - REST
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/tcp_loadbalancers/md-icapsrv-nginx-8080"
+#        method: GET
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        status_code: 200, 404
+#        validate_certs: no
+#      register: var_register
+#
+#    - name: CREATE TCP LB OPSWAT MD ICAP - NGINX service
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/tcp_loadbalancers"
+#        method: POST
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        body: "{{ lookup('template','tcp_lb_mdicapsrv-8080.json') }}"
+#        body_format: json
+#        status_code: 200
+#        validate_certs: no
+#      when: var_register.status == 404
+#
+#    - name: UPDATE TCP LB OPSWAT MD ICAP - NGINX service
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/tcp_loadbalancers/md-icapsrv-nginx-8080"
+#        method: PUT
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        body: "{{ lookup('template','tcp_lb_mdicapsrv-8080.json') }}"
+#        body_format: json
+#        status_code: 200
+#        validate_certs: no
+#      when: var_register.status == 200
+
+#- name: Create or Update HTTP LB OPSWAT MD components - admin UI
+#  block:
+#
+#    - name: GET HTTP LB OPSWAT MD components - admin UI
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/http_loadbalancers/{{ item.name }}-admin-ui"
+#        method: GET
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        status_code: 200, 404
+#        validate_certs: no
+#      loop: "{{ chart_values.components }}"
+#      register: var_register
+#
+#    - name: CREATE HTTP LB OPSWAT MD components - admin UI
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/http_loadbalancers"
+#        method: POST
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        body: "{{ lookup('template','http_lb_md_http_admin_ui.json') }}"
+#        body_format: json
+#        status_code: 200
+#        validate_certs: no
+#      loop: "{{ chart_values.components }}"
+#      loop_control:
+#        index_var: cur_index
+#      when: var_register.results[cur_index].status == 404
+#
+#    - name: UPDATE HTTP LB OPSWAT MD components - admin UI
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/http_loadbalancers/{{ item.name }}-admin-ui"
+#        method: PUT
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        body: "{{ lookup('template','http_lb_md_http_admin_ui.json') }}"
+#        body_format: json
+#        status_code: 200
+#        validate_certs: no
+#      loop: "{{ chart_values.components }}"
+#      loop_control:
+#        index_var: cur_index
+#      when: var_register.results[cur_index].status == 200
+
+#- name: Create or Update Workload nginx-agent
+#  block:
+#
+#    - name: GET Workload nginx-agent-agent
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/workloads/nginx-agent"
+#        method: GET
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        status_code: 200, 404
+#        validate_certs: no
+#      register: var_register
+#
+#    - name: CREATE Workload nginx-agent
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/workloads"
+#        method: POST
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        body: "{{ lookup('template','workload_nginx_agent.json') }}"
+#        body_format: json
+#        status_code: 200
+#        validate_certs: no
+#      when: var_register.status == 404
+#
+#    - name: UPDATE Workload nginx-agent
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/workloads/nginx-agent"
+#        method: PUT
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        body: "{{ lookup('template','workload_nginx_agent.json') }}"
+#        body_format: json
+#        status_code: 200
+#        validate_certs: no
+#      when: var_register.status == 200
+#
+#- name: Create or Update Health Check nginx-agent
+#  block:
+#
+#    - name: GET Health Check nginx-agent
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/healthchecks/nginx-agent"
+#        method: GET
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        status_code: 200, 404, 409
+#        validate_certs: no
+#      register: var_register
+#
+#    - name: CREATE Health Check nginx-agent
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/healthchecks"
+#        method: POST
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        body: "{{ lookup('template','health_check_nginx_agent.json') }}"
+#        body_format: json
+#        status_code: 200
+#        validate_certs: no
+#      when: var_register.status == 404
+#
+#    - name: UPDATE Health Check nginx-agent
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/healthchecks/nginx-agent"
+#        method: PUT
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        body: "{{ lookup('template','health_check_nginx_agent.json') }}"
+#        body_format: json
+#        status_code: 200
+#        validate_certs: no
+#      when: var_register.status == 200
+#
+#- name: Create or Update Origin Pool nginx-agent
+#  block:
+#
+#    - name: GET Origin Pool nginx-agent
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/origin_pools/nginx-agent"
+#        method: GET
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        status_code: 200, 404
+#        validate_certs: no
+#      register: var_register
+#
+#    - name: CREATE Origin Pool nginx-agent
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/origin_pools"
+#        method: POST
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        body: "{{ lookup('template','origin_pool_nginx_agent.json') }}"
+#        body_format: json
+#        status_code: 200
+#        validate_certs: no
+#      when: var_register.status == 404
+#
+#    - name: UPDATE Origin Pool nginx-agent
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/origin_pools/nginx-agent"
+#        method: PUT
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        body: "{{ lookup('template','origin_pool_nginx_agent.json') }}"
+#        body_format: json
+#        status_code: 200
+#        validate_certs: no
+#      when: var_register.status == 200
+
+

@@ -1,0 +1,53 @@
+{
+  "metadata": {
+    "name": "md-core-rest-8008",
+    "namespace": "{{ extra_volterra_namespace }}",
+    "labels": {
+      "owner": "{{ extra_owner_email.split('@')[0] }}",
+      "project": "cloudbuilder"
+    },
+    "description": "NGINX workshop",
+    "disable": false
+  },
+  "spec": {
+    "domains": [
+      "md-core-rest-8008"
+    ],
+    "listen_port": 80,
+    "no_sni": {},
+    "dns_volterra_managed": false,
+    "origin_pools": [],
+    "origin_pools_weights": [
+      {
+        "pool": {
+          "tenant": "{{ extra_volterra.tenant.full }}",
+          "namespace": "{{ extra_volterra_namespace }}",
+          "name": "md-core-rest-8008",
+          "kind": "origin_pool"
+        },
+        "weight": 1,
+        "priority": 1,
+        "endpoint_subsets": {}
+      }
+    ],
+    "advertise_custom": {
+      "advertise_where": [
+        {
+          "port": 80,
+          "vk8s_service": {
+            "virtual_site": {
+              "tenant": "{{ extra_volterra.tenant.full }}",
+              "namespace": "{{ extra_volterra_namespace }}",
+              "name": "cloudbuilder-landing-zones"
+            }
+          }
+        }
+      ]
+    },
+    "hash_policy_choice_round_robin": {},
+    "idle_timeout": 3600000,
+    "retract_cluster": {},
+    "tcp": {},
+    "downstream_tls_certificate_expiration_timestamps": []
+  }
+}

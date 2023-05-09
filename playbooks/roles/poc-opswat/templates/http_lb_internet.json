@@ -1,0 +1,139 @@
+{
+  "metadata": {
+    "name": "internet",
+    "namespace": "{{ extra_volterra_namespace }}",
+    "labels": {
+      "owner": "{{ extra_owner_email.split('@')[0] }}",
+      "project": "cloudbuilder"
+    },
+    "description": "NGINX workshop",
+    "disable": false
+  },
+  "spec": {
+    "domains": [
+      "{{ extra_fqdn_demo }}"
+    ],
+    "http": {
+      "dns_volterra_managed": false
+    },
+    "advertise_on_public_default_vip": {},
+    "default_route_pools": [],
+    "routes": [
+      {
+        "simple_route": {
+          "http_method": "PUT",
+          "path": {
+            "prefix": "/"
+          },
+          "headers": [],
+          "origin_pools": [
+            {
+              "pool": {
+                "tenant": "{{ extra_volterra.tenant.full }}",
+                "namespace": "{{ extra_volterra_namespace }}",
+                "name": "nginx-agent",
+                "kind": "origin_pool"
+              },
+              "weight": 1,
+              "priority": 1,
+              "endpoint_subsets": {}
+            }
+          ],
+          "disable_host_rewrite": {}
+        }
+      },
+      {
+        "simple_route": {
+          "http_method": "POST",
+          "path": {
+            "prefix": "/"
+          },
+          "headers": [],
+          "origin_pools": [
+            {
+              "pool": {
+                "tenant": "{{ extra_volterra.tenant.full }}",
+                "namespace": "{{ extra_volterra_namespace }}",
+                "name": "nginx-agent",
+                "kind": "origin_pool"
+              },
+              "weight": 1,
+              "priority": 1,
+              "endpoint_subsets": {}
+            }
+          ],
+          "disable_host_rewrite": {}
+        }
+      },
+      {
+        "simple_route": {
+          "http_method": "ANY",
+          "path": {
+            "prefix": "/"
+          },
+          "headers": [
+            {
+              "name": "Host",
+              "exact": "{{ extra_fqdn_demo }}",
+              "invert_match": false
+            }
+          ],
+          "origin_pools": [
+            {
+              "pool": {
+                "tenant": "{{ extra_volterra.tenant.full }}",
+                "namespace": "{{ extra_volterra_namespace }}",
+                "name": "{{ extra_fqdn_demo | replace('.', '-') }}",
+                "kind": "origin_pool"
+              },
+              "weight": 1,
+              "priority": 1,
+              "endpoint_subsets": {}
+            }
+          ],
+          "disable_host_rewrite": {},
+          "advanced_options": {
+            "common_hash_policy": {},
+            "priority": "DEFAULT",
+            "endpoint_subsets": {},
+            "disable_prefix_rewrite": {},
+            "request_headers_to_add": [],
+            "request_headers_to_remove": [],
+            "response_headers_to_add": [],
+            "response_headers_to_remove": [],
+            "disable_location_add": false,
+            "inherited_waf": {},
+            "disable_spdy": {},
+            "disable_web_socket_config": {},
+            "default_retry_policy": {},
+            "timeout": 30000,
+            "common_buffering": {},
+            "disable_mirroring": {},
+            "retract_cluster": {}
+          }
+        }
+      }
+    ],
+    "disable_waf": {},
+    "add_location": true,
+    "no_challenge": {},
+    "user_id_client_ip": {},
+    "disable_rate_limit": {},
+    "waf_exclusion_rules": [],
+    "data_guard_rules": [],
+    "blocked_clients": [],
+    "trusted_clients": [],
+    "ddos_mitigation_rules": [],
+    "service_policies_from_namespace": {},
+    "round_robin": {},
+    "disable_trust_client_ip_headers": {},
+    "disable_ddos_detection": {},
+    "disable_malicious_user_detection": {},
+    "disable_api_discovery": {},
+    "disable_bot_defense": {},
+    "disable_api_definition": {},
+    "disable_ip_reputation": {},
+    "disable_client_side_defense": {},
+    "graphql_rules": []
+  }
+}

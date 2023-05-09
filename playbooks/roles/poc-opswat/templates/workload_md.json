@@ -1,0 +1,94 @@
+{
+  "metadata": {
+    "name": "{{ item.name }}",
+    "namespace": "{{ extra_volterra_namespace }}",
+    "labels": {
+      "owner": "{{ extra_owner_email.split('@')[0] }}",
+      "project": "cloudbuilder"
+    },
+    "annotations": {
+      "ves.io/app": "malware-analysis"
+    },
+    "description": "OPSWAT {{ item.name }}",
+    "disable": false
+  },
+    "spec": {
+        "service":  {
+            "num_replicas": "{{ item.replicas }}",
+            "containers": [
+                {
+                    "name": "{{ item.name }}",
+                    {%- if item.image.type == 'public' -%}
+                        "image": {
+                            "name": "{{ item.image.name }}",
+                            "public": {},
+                            "pull_policy": "IMAGE_PULL_POLICY_ALWAYS"
+                        },
+                    {%- else -%}
+                        "image": {
+                            "name": "{{ stats_acr_login_server }}/{{ item.image.name }}:{{ extra_namespace }}",
+                            "container_registry": {
+                                "tenant": "{{ extra_volterra.tenant.full }}",
+                                "namespace": "{{ extra_volterra_namespace }}",
+                                "name": "{{ stats_acr_login_server  | replace('.', '-') }}"
+                            },
+                            "pull_policy": "IMAGE_PULL_POLICY_ALWAYS"
+                        },
+                    {%- endif -%}
+                    "init_container": false
+                }
+            ],
+            {%- if item.name == 'md-icapsrv' -%}
+            "configuration": {
+              "parameters": [
+                {
+                  "file": {
+                    "name": "mdicapsrv-config.json",
+                    "data": "string:///{{ lookup('file', 'config_mdicapsrv.json') | b64encode }}",
+                    "volume_name": "init-config",
+                    "mount": {
+                      "mode": "VOLUME_MOUNT_READ_ONLY",
+                      "mount_path": "/opt/opswat/",
+                      "sub_path": ""
+                    }
+                  }
+                }
+              ]
+            },
+            {%- endif -%}
+            "deploy_options":
+            {
+                "deploy_ce_virtual_sites":
+                {
+                    "virtual_site":
+                    [
+                        {
+                            "tenant": "{{ extra_volterra.tenant.full }}",
+                            "namespace": "{{ extra_volterra_namespace }}",
+                            "name": "cloudbuilder-landing-zones"
+                        }
+                    ]
+                }
+            },
+            "advertise_options": {
+              "advertise_in_cluster": {
+                "multi_ports": {
+                  "ports": [
+                    {%- for port in item.ports -%}
+                      {
+                        "name": "tcp-{{ port.port }}",
+                        "info": {
+                          "port": {{ port.port }},
+                          "protocol": "PROTOCOL_TCP",
+                          "target_port": {{ port.port }}
+                        }
+                      }
+                    {%- if not loop.last -%},{% endif %}
+                    {%- endfor -%}
+                  ]
+                }
+              }
+            }
+        }
+    }
+}

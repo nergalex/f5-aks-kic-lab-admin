@@ -1,0 +1,99 @@
+---
+- name: set variables Tooling
+  set_fact:
+    var_site_id: "{{ extra_volterra_site_tooling_id }}"
+
+- name: CREATE Network Security Group
+  delegate_to: localhost
+  azure.azcollection.azure_rm_securitygroup:
+    resource_group: "rg-volterra-{{ var_site_id }}"
+    name: "nsg-{{ var_site_id }}-opswat"
+    location: "{{ extra_azure_region }}"
+    tags:
+      owner: "{{ extra_owner_email.split('@')[0] }}"
+      project: cloudbuilder
+    rules:
+      - name: in_allow_local_customer_edge_inside
+        direction: Inbound
+        priority: 100
+        source_address_prefix: "10.201.{{ var_site_id }}.0/24"
+        access: Allow
+      - name: in_allow_cross_management
+        direction: Inbound
+        priority: 101
+        source_address_prefix: "10.0.0.0/24"
+        access: Allow
+      - name: out_allow_all
+        direction: Outbound
+        priority: 999
+        access: Allow
+
+- name: CREATE vNIC
+  delegate_to: localhost
+  azure.azcollection.azure_rm_networkinterface:
+    resource_group: "rg-volterra-{{ var_site_id }}"
+    name: "nic-{{ var_site_id }}-opswat-postgre-db"
+    location: "{{ extra_azure_region }}"
+    virtual_network: "vnet-cloudbuilder-{{ var_site_id }}"
+    subnet_name: "subnet-10-201-{{ var_site_id }}-0-25"
+    create_with_security_group: true
+    security_group: "nsg-{{ var_site_id }}-opswat"
+    tags:
+      owner: "{{ extra_owner_email.split('@')[0] }}"
+      project: cloudbuilder
+    ip_configurations:
+      - name: mgt
+        private_ip_address: "10.201.{{ var_site_id }}.10"
+        private_ip_allocation_method: 'Static'
+        primary: true
+
+- name: CREATE VM
+  delegate_to: localhost
+  azure.azcollection.azure_rm_virtualmachine:
+    resource_group: "rg-volterra-{{ var_site_id }}"
+    name: "opswat-postgre-db-{{ var_site_id }}"
+    location: "{{ extra_azure_region }}"
+    short_hostname: "opswat-postgre-db-{{ var_site_id }}"
+    vm_size: Standard_D2s_v3
+    os_disk_size_gb: 30
+    tags:
+      owner: "{{ extra_owner_email.split('@')[0] }}"
+      project: cloudbuilder
+    admin_username: cyber
+    ssh_password_enabled: false
+    ssh_public_keys:
+      - path: "/home/cyber/.ssh/authorized_keys"
+        key_data: "{{ extra_ssh_key }}"
+    image:
+      publisher: cloud-infrastructure-services
+      offer: postgresql-ubuntu
+      sku: postgresql-ubuntu
+      version: latest
+    plan:
+      name: postgresql-ubuntu
+      publisher: cloud-infrastructure-services
+      product: postgresql-ubuntu
+    managed_disk_type: Premium_LRS
+    os_type: Linux
+    network_interface_names:
+      - "nic-{{ var_site_id }}-opswat-postgre-db"
+
+- name: Create VM Extension - cmd only - NOT TESTED
+  delegate_to: localhost
+  azure.azcollection.azure_rm_virtualmachineextension:
+    name: "extension-postgre-db"
+    location: "{{ extra_azure_region }}"
+    resource_group: "rg-volterra-{{ var_site_id }}"
+    virtual_machine_name: "opswat-postgre-db-{{ var_site_id }}"
+    publisher: 'Microsoft.Azure.Extensions'
+    virtual_machine_extension_type: 'CustomScript'
+    type_handler_version: 2.0
+    protected_settings: '{"commandToExecute": "{{ lookup("template", "postgre-db.jinja2") }}"}'
+    auto_upgrade_minor_version: true
+
+
+
+
+
+
+...

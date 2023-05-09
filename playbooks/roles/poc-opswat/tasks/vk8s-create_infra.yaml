@@ -1,0 +1,468 @@
+- name: set var NameSpace
+  set_fact:
+    extra_volterra_namespace: "{{ extra_namespace }}"
+
+#- name: Create or Update NameSpace
+#  block:
+#
+#    - name: GET NameSpace
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/web/namespaces/{{ extra_volterra_namespace }}"
+#        method: GET
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        status_code: 200, 404
+#        validate_certs: no
+#      register: var_register
+#
+#    - name: CREATE NameSpace
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/web/namespaces"
+#        method: POST
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        body: "{{ lookup('template','namespace.json') }}"
+#        body_format: json
+#        status_code: 200
+#        validate_certs: no
+#      when: var_register.status == 404
+#
+#    - name: UPDATE NameSpace
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/web/namespaces/{{ extra_volterra_namespace }}"
+#        method: PUT
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        body: "{{ lookup('template','namespace.json') }}"
+#        body_format: json
+#        status_code: 200
+#        validate_certs: no
+#      when: var_register.status == 200
+#
+#- pause:
+#    minutes: 1
+#
+#- name: Create or Update Virtual Site
+#  block:
+#
+#    - name: GET Virtual Site
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/virtual_sites/cloudbuilder-landing-zones"
+#        method: GET
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        status_code: 200, 404
+#        validate_certs: no
+#      register: var_register
+#
+#    - name: CREATE Virtual Site
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/virtual_sites"
+#        method: POST
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        body: "{{ lookup('template','virtual_site.json') }}"
+#        body_format: json
+#        status_code: 200
+#        validate_certs: no
+#      when: var_register.status == 404
+#
+#    - name: UPDATE Virtual Site
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/virtual_sites/cloudbuilder-landing-zones"
+#        method: PUT
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        body: "{{ lookup('template','virtual_site.json') }}"
+#        body_format: json
+#        status_code: 200
+#        validate_certs: no
+#      when: var_register.status == 200
+
+- name: Create or Update Workload Flavor - MD CORE
+  block:
+
+    - name: GET Workload Flavor - MD CORE
+      uri:
+        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/shared/workload_flavors/opswat-md-core"
+        method: GET
+        headers:
+          Content-Type: application/json
+          Authorization: "APIToken {{ extra_volterra.token }}"
+        status_code: 200, 404
+        validate_certs: no
+      register: var_register
+
+    - name: CREATE Workload Flavor - MD CORE
+      uri:
+        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/shared/workload_flavors"
+        method: POST
+        headers:
+          Content-Type: application/json
+          Authorization: "APIToken {{ extra_volterra.token }}"
+        body: "{{ lookup('template','workload_flavor_mdcore.json') }}"
+        body_format: json
+        status_code: 200
+        validate_certs: no
+      when: var_register.status == 404
+
+    - name: UPDATE Workload Flavor - MD CORE
+      uri:
+        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/shared/workload_flavors/opswat-md-core"
+        method: PUT
+        headers:
+          Content-Type: application/json
+          Authorization: "APIToken {{ extra_volterra.token }}"
+        body: "{{ lookup('template','workload_flavor_mdcore.json') }}"
+        body_format: json
+        status_code: 200
+        validate_certs: no
+      when: var_register.status == 200
+
+- name: Create or Update Workload Flavor - MD ICAP
+  block:
+
+    - name: GET Workload Flavor - MD ICAP
+      uri:
+        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/shared/workload_flavors/opswat-md-icap"
+        method: GET
+        headers:
+          Content-Type: application/json
+          Authorization: "APIToken {{ extra_volterra.token }}"
+        status_code: 200, 404
+        validate_certs: no
+      register: var_register
+
+    - name: CREATE Workload Flavor - MD ICAP
+      uri:
+        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/shared/workload_flavors"
+        method: POST
+        headers:
+          Content-Type: application/json
+          Authorization: "APIToken {{ extra_volterra.token }}"
+        body: "{{ lookup('template','workload_flavor_mdicap.json') }}"
+        body_format: json
+        status_code: 200
+        validate_certs: no
+      when: var_register.status == 404
+
+    - name: UPDATE Workload Flavor - MD ICAP
+      uri:
+        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/shared/workload_flavors/opswat-md-icap"
+        method: PUT
+        headers:
+          Content-Type: application/json
+          Authorization: "APIToken {{ extra_volterra.token }}"
+        body: "{{ lookup('template','workload_flavor_mdicap.json') }}"
+        body_format: json
+        status_code: 200
+        validate_certs: no
+      when: var_register.status == 200
+
+#- name: Create or Update Virtual K8s
+#  block:
+#
+#    - name: GET Virtual K8s
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/virtual_k8ss/{{ extra_volterra_namespace }}"
+#        method: GET
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        status_code: 200, 404
+#        validate_certs: no
+#      register: var_register
+#
+#    - name: CREATE Virtual K8s
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/virtual_k8ss"
+#        method: POST
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        body: "{{ lookup('template','virtual_k8s.json') }}"
+#        body_format: json
+#        status_code: 200
+#        validate_certs: no
+#      when: var_register.status == 404
+#
+#    - name: UPDATE Virtual K8s
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/virtual_k8ss/{{ extra_volterra_namespace }}"
+#        method: PUT
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        body: "{{ lookup('template','virtual_k8s.json') }}"
+#        body_format: json
+#        status_code: 200
+#        validate_certs: no
+#      when: var_register.status == 200
+#
+#- pause:
+#    minutes: 4
+#
+#- name: Create or Update Network Policy
+#  block:
+#
+#    - name: GET Network Policy
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/network_policys/cloudbuilder"
+#        method: GET
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        status_code: 200, 404
+#        validate_certs: no
+#      register: var_register
+#
+#    - name: CREATE Network Policy
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/network_policys"
+#        method: POST
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        body: "{{ lookup('template','vk8s_network_policy.json') }}"
+#        body_format: json
+#        status_code: 200
+#        validate_certs: no
+#      when: var_register.status == 404
+#
+#    - name: UPDATE Network Policy
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/network_policys/cloudbuilder"
+#        method: PUT
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        body: "{{ lookup('template','vk8s_network_policy.json') }}"
+#        body_format: json
+#        status_code: 200
+#        validate_certs: no
+#      when: var_register.status == 200
+#
+#    - name: ACTIVATE Network Policy
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/active_network_policies"
+#        method: POST
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        body:
+#          namespace: null
+#          network_policies:
+#            - name: cloudbuilder
+#              namespace: "{{ extra_volterra_namespace }}"
+#              tenant: "{{ extra_volterra.tenant.full }}"
+#          spec: {}
+#        body_format: json
+#        status_code: 200
+#        validate_certs: no
+#
+#- name: Create or Update Container Registry
+#  block:
+#
+#    - name: GET Container Registry
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/container_registrys/{{ stats_acr_login_server | replace('.', '-') }}"
+#        method: GET
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        status_code: 200, 404
+#        validate_certs: no
+#      register: var_register
+#
+#    - name: CREATE Container Registry
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/container_registrys"
+#        method: POST
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        body: "{{ lookup('template','container_registry.json') }}"
+#        body_format: json
+#        status_code: 200
+#        validate_certs: no
+#      when: var_register.status == 404
+#
+#    - name: UPDATE Container Registry | site 3 only
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/container_registrys/{{ stats_acr_login_server | replace('.', '-') }}"
+#        method: PUT
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        body: "{{ lookup('template','container_registry.json') }}"
+#        body_format: json
+#        status_code: 200
+#        validate_certs: no
+#      when: var_register.status == 200
+#
+#- name: Create or Update Origin Pool NGINX NMS TCP
+#  block:
+#
+#    - name: GET Origin Pool NGINX NMS TCP
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/origin_pools/nginx-nms-tcp"
+#        method: GET
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        status_code: 200, 404
+#        validate_certs: no
+#      register: var_register
+#
+#    - name: CREATE Origin Pool NGINX NMS TCP
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/origin_pools"
+#        method: POST
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        body: "{{ lookup('template','origin_pool_nms_tcp.json') }}"
+#        body_format: json
+#        status_code: 200
+#        validate_certs: no
+#      when: var_register.status == 404
+#
+#    - name: UPDATE Origin Pool NGINX NMS TCP
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/origin_pools/nginx-nms-tcp"
+#        method: PUT
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        body: "{{ lookup('template','origin_pool_nms_tcp.json') }}"
+#        body_format: json
+#        status_code: 200
+#        validate_certs: no
+#      when: var_register.status == 200
+#
+#- name: Create or Update TCP LB NGINX NMS
+#  block:
+#
+#    - name: GET TCP LB ACM
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/tcp_loadbalancers/nginx-nms"
+#        method: GET
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        status_code: 200, 404
+#        validate_certs: no
+#      register: var_register
+#
+#    - name: CREATE TCP LB NMS
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/tcp_loadbalancers"
+#        method: POST
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        body: "{{ lookup('template','tcp_lb_nms.json') }}"
+#        body_format: json
+#        status_code: 200
+#        validate_certs: no
+#      when: var_register.status == 404
+#
+#    - name: UPDATE TCP LB NMS
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/tcp_loadbalancers/nginx-nms"
+#        method: PUT
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        body: "{{ lookup('template','tcp_lb_nms.json') }}"
+#        body_format: json
+#        status_code: 200
+#        validate_certs: no
+#      when: var_register.status == 200
+#
+#- name: Create or Update Origin Pool TCP OPSWAT PaaS DB
+#  block:
+#
+#    - name: GET Origin Pool TCP OPSWAT PaaS DB
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/origin_pools/postgre-vm"
+#        method: GET
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        status_code: 200, 404
+#        validate_certs: no
+#      register: var_register
+#
+#    - name: CREATE Origin Pool TCP OPSWAT PaaS DB
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/origin_pools"
+#        method: POST
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        body: "{{ lookup('template','origin_pool_postgre_vm.json') }}"
+#        body_format: json
+#        status_code: 200
+#        validate_certs: no
+#      when: var_register.status == 404
+#
+#    - name: UPDATE Origin Pool TCP OPSWAT PaaS DB
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/origin_pools/postgre-vm"
+#        method: PUT
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        body: "{{ lookup('template','origin_pool_postgre_vm.json') }}"
+#        body_format: json
+#        status_code: 200
+#        validate_certs: no
+#      when: var_register.status == 200
+#
+#- name: Create or Update TCP LB OPSWAT PaaS DB
+#  block:
+#
+#    - name: GET TCP LB OPSWAT PaaS DB
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/tcp_loadbalancers/postgre-vm"
+#        method: GET
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        status_code: 200, 404
+#        validate_certs: no
+#      register: var_register
+#
+#    - name: CREATE TCP LB OPSWAT PaaS DB
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/tcp_loadbalancers"
+#        method: POST
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        body: "{{ lookup('template','tcp_lb_postgre_vm.json') }}"
+#        body_format: json
+#        status_code: 200
+#        validate_certs: no
+#      when: var_register.status == 404
+#
+#    - name: UPDATE TCP LB OPSWAT PaaS DB
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/tcp_loadbalancers/postgre-vm"
+#        method: PUT
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        body: "{{ lookup('template','tcp_lb_postgre_vm.json') }}"
+#        body_format: json
+#        status_code: 200
+#        validate_certs: no
+#      when: var_register.status == 200
+

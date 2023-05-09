@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "name": "nginx-nms-tcp",
+    "namespace": "{{ extra_volterra_namespace }}",
+    "labels": {
+      "owner": "{{ extra_owner_email.split('@')[0] }}",
+      "project": "cloudbuilder"
+    },
+    "description": "NGINX workshop",
+    "disable": false
+  },
+  "spec": {
+    "origin_servers": [
+      {
+        "private_ip": {
+          "ip": "{{ extra_nginx_nms.ip }}",
+          "site_locator": {
+            "site": {
+              "tenant": "{{ extra_volterra.tenant.full }}",
+              "namespace": "system",
+              "name": "cloudbuilder-{{ extra_volterra_site_tooling_id }}"
+            }
+          },
+          "outside_network": {}
+        },
+        "labels": {}
+      }
+    ],
+    "no_tls": {},
+    "port": 443,
+    "same_as_endpoint_port": {},
+    "healthcheck": [],
+    "loadbalancer_algorithm": "LB_OVERRIDE",
+    "endpoint_selection": "LOCAL_PREFERRED"
+  }
+}

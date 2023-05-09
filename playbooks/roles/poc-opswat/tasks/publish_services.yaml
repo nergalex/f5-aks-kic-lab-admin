@@ -1,0 +1,128 @@
+- name: set var NameSpace
+  set_fact:
+    extra_volterra_namespace: "{{ extra_namespace }}"
+
+#- name: Create or Update Origin Pool fqdn_demo
+#  block:
+#
+#    - name: GET Origin Pool fqdn_demo
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/origin_pools/{{ extra_fqdn_demo | replace('.', '-') }}"
+#        method: GET
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        status_code: 200, 404
+#        validate_certs: no
+#      register: var_register
+#
+#    - name: CREATE Origin Pool fqdn_demo
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/origin_pools"
+#        method: POST
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        body: "{{ lookup('template','origin_pool_internal_fqdn_demo.json') }}"
+#        body_format: json
+#        status_code: 200
+#        validate_certs: no
+#      when: var_register.status == 404
+#
+#    - name: UPDATE Origin Pool fqdn_demo
+#      uri:
+#        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/origin_pools/{{ extra_fqdn_demo | replace('.', '-') }}"
+#        method: PUT
+#        headers:
+#          Content-Type: application/json
+#          Authorization: "APIToken {{ extra_volterra.token }}"
+#        body: "{{ lookup('template','origin_pool_internal_fqdn_demo.json') }}"
+#        body_format: json
+#        status_code: 200
+#        validate_certs: no
+#      when: var_register.status == 200
+
+- name: Create or Update HTTP LB - INTERNET
+  block:
+
+    - name: GET HTTP LB - EXTERNAL
+      uri:
+        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/http_loadbalancers/internet-lb"
+        method: GET
+        headers:
+          Content-Type: application/json
+          Authorization: "APIToken {{ extra_volterra.token }}"
+        status_code: 200, 404
+        validate_certs: no
+      register: var_register
+
+    - name: CREATE HTTP LB - INTERNET
+      uri:
+        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/http_loadbalancers"
+        method: POST
+        headers:
+          Content-Type: application/json
+          Authorization: "APIToken {{ extra_volterra.token }}"
+        body: "{{ lookup('template','http_lb_internet.json') }}"
+        body_format: json
+        status_code: 200
+        validate_certs: no
+      when: var_register.status == 404
+
+    - name: UPDATE HTTP LB - INTERNET
+      uri:
+        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/http_loadbalancers/internet-lb"
+        method: PUT
+        headers:
+          Content-Type: application/json
+          Authorization: "APIToken {{ extra_volterra.token }}"
+        body: "{{ lookup('template','http_lb_internet.json') }}"
+        body_format: json
+        status_code: 200
+        validate_certs: no
+      when: var_register.status == 200
+
+- name: Create or Update HTTP LB - LOCAL
+  block:
+
+    - name: GET HTTP LB - LOCAL
+      uri:
+        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/http_loadbalancers/local-lb"
+        method: GET
+        headers:
+          Content-Type: application/json
+          Authorization: "APIToken {{ extra_volterra.token }}"
+        status_code: 200, 404
+        validate_certs: no
+      register: var_register
+
+    - name: CREATE HTTP LB - LOCAL
+      uri:
+        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/http_loadbalancers"
+        method: POST
+        headers:
+          Content-Type: application/json
+          Authorization: "APIToken {{ extra_volterra.token }}"
+        body: "{{ lookup('template','http_lb_local.json') }}"
+        body_format: json
+        status_code: 200
+        validate_certs: no
+      when: var_register.status == 404
+
+    - name: UPDATE HTTP LB - LOCAL
+      uri:
+        url: "https://{{ extra_volterra.tenant.short }}.console.ves.volterra.io/api/config/namespaces/{{ extra_volterra_namespace }}/http_loadbalancers/local-lb"
+        method: PUT
+        headers:
+          Content-Type: application/json
+          Authorization: "APIToken {{ extra_volterra.token }}"
+        body: "{{ lookup('template','http_lb_local.json') }}"
+        body_format: json
+        status_code: 200
+        validate_certs: no
+      when: var_register.status == 200
+
+
+
+
+

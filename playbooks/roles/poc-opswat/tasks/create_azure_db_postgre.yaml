@@ -1,0 +1,43 @@
+---
+- name: pass
+  set_fact:
+    var: pass
+
+- name: CREATE Resource Group
+  delegate_to: localhost
+  azure.azcollection.azure_rm_resourcegroup:
+    name: "rg-{{ extra_volterra.tenant.short }}-opswat-paasdb"
+    location: eastus2
+    tags:
+      owner: "{{ extra_owner_email }}"
+      app: cloudbuilder
+      project: nginx-workshop
+
+- name: CREATE PostgreSQL Server
+  azure.azcollection.azure_rm_postgresqlserver:
+    resource_group: "rg-{{ extra_volterra.tenant.short }}-opswat-paasdb"
+    name: "nginx-{{ extra_volterra.tenant.short }}-opswat-paasdb"
+    sku:
+      name: B_Gen5_1
+      tier: Basic
+    location: eastus2
+    storage_mb: 5120
+    version: '11'
+    enforce_ssl: False
+    storage_autogrow: False
+    admin_username: opswat
+    admin_password: Ng1nxOpsw4t
+    tags:
+      owner: "{{ extra_owner_email }}"
+      app: cloudbuilder
+      project: nginx-workshop
+  register: register
+
+- name: CREATE PostgreSQL Database
+  azure.azcollection.azure_rm_postgresqldatabase:
+    resource_group: "rg-{{ extra_volterra.tenant.short }}-opswat-paasdb"
+    server_name: "nginx-{{ extra_volterra.tenant.short }}-opswat-paasdb"
+    name: "{{ extra_namespace }}"
+
+
+...

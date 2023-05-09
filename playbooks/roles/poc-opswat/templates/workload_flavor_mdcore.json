@@ -1,0 +1,18 @@
+{
+  "metadata": {
+    "name": "opswat-md-core",
+    "namespace": "shared",
+    "description": "NGINX workshop",
+    "labels": {
+      "owner": "{{ extra_owner_email.split('@')[0] }}",
+      "project": "cloudbuilder"
+    },
+    "annotations": {},
+    "disable": false
+  },
+  "spec": {
+    "memory": "4000",
+    "vcpus": 4,
+    "ephemeral_storage": "10000"
+  }
+}

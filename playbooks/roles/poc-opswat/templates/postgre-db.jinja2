@@ -1,0 +1,13 @@
+# https://cloudinfrastructureservices.co.uk/how-to-setup-install-postgresql-server-on-azure-aws-gcp
+{# VAR #}
+{% set linux_user %}
+usermod -aG sudo postgres && echo "postgres:Ng1nxOpsw4t" | chpasswd {% endset %}
+{% set postgre_user %}
+cd /home/cyber/ && sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'Ng1nxOpsw4t';" {% endset %}
+{% set postgre_config %}
+echo "listen_addresses = '*'" >> /etc/postgresql/12/main/postgresql.conf && echo "host all all 0.0.0.0/0 md5" >> /etc/postgresql/12/main/pg_hba.conf && systemctl restart postgresql {% endset %}
+{# RETURN #}
+{{ linux_user }} ; {{ postgre_user }} ; {{ postgre_config }}
+
+
+sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'Ng1nxOpsw4t';"

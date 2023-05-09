@@ -1,0 +1,79 @@
+{
+  "metadata": {
+    "name": "postgres-core",
+    "namespace": "demo-malware-analysis",
+    "labels": {},
+    "annotations": {},
+    "disable": false
+  },
+  "spec": {
+    "service": {
+      "num_replicas": 1,
+      "containers": [
+        {
+          "name": "postgres-core",
+          "image": {
+            "name": "bitnami/postgresql",
+            "public": {},
+            "pull_policy": "IMAGE_PULL_POLICY_DEFAULT"
+          },
+          "init_container": false,
+          "flavor": "CONTAINER_FLAVOR_TYPE_MEDIUM",
+          "command": [],
+          "args": []
+        }
+      ],
+      "volumes": [
+        {
+          "name": "postgres-core",
+          "empty_dir": {
+            "size_limit": 10,
+            "mount": {
+              "mode": "VOLUME_MOUNT_READ_WRITE",
+              "mount_path": "/bitnami/postgresql"
+            }
+          }
+        }
+      ],
+      "configuration": {
+        "parameters": [
+          {
+            "env_var": {
+              "name": "POSTGRESQL_PASSWORD",
+              "value": "Ng1nxOpsw4t"
+            }
+          },
+          {
+            "env_var": {
+              "name": "POSTGRESQL_USERNAME",
+              "value": "postgres"
+            }
+          }
+        ]
+      },
+      "deploy_options": {
+        "deploy_ce_virtual_sites": {
+          "virtual_site": [
+            {
+              "tenant": "macif-ytjgsceq",
+              "namespace": "demo-malware-analysis",
+              "name": "cloudbuilder-landing-zones",
+              "kind": "virtual_site"
+            }
+          ]
+        }
+      },
+      "advertise_options": {
+        "advertise_in_cluster": {
+          "port": {
+            "info": {
+              "port": 5432,
+              "protocol": "PROTOCOL_TCP",
+              "same_as_port": {}
+            }
+          }
+        }
+      }
+    }
+  }
+}

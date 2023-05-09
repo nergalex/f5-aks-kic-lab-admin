@@ -1,0 +1,84 @@
+{
+  "metadata": {
+    "name": "postgres-core",
+    "namespace": "demo-malware-analysis",
+    "labels": {},
+    "annotations": {},
+    "disable": false
+  },
+  "spec": {
+    "service": {
+      "num_replicas": 1,
+      "containers": [
+        {
+          "name": "postgres-core",
+          "image": {
+            "name": "postgres",
+            "public": {},
+            "pull_policy": "IMAGE_PULL_POLICY_DEFAULT"
+          },
+          "init_container": false,
+          "flavor": "CONTAINER_FLAVOR_TYPE_LARGE",
+          "command": [],
+          "args": []
+        }
+      ],
+      "volumes": [
+        {
+          "name": "postgre",
+          "persistent_volume": {
+            "storage": {
+              "storage_size": 10,
+              "default": {},
+              "access_mode": "ACCESS_MODE_READ_WRITE_ONCE"
+            },
+            "mount": {
+              "mode": "VOLUME_MOUNT_READ_WRITE",
+              "mount_path": "/var/lib/postgresql/data",
+              "sub_path": "data"
+            }
+          }
+        }
+      ],
+      "configuration": {
+        "parameters": [
+          {
+            "env_var": {
+              "name": "POSTGRES_PASSWORD",
+              "value": "Ng1nxOpsw4t"
+            }
+          },
+          {
+            "env_var": {
+              "name": "POSTGRES_USER",
+              "value": "postgres"
+            }
+          }
+        ]
+      },
+      "deploy_options": {
+        "deploy_ce_virtual_sites": {
+          "virtual_site": [
+            {
+              "tenant": "macif-ytjgsceq",
+              "namespace": "demo-malware-analysis",
+              "name": "cloudbuilder-landing-zones",
+              "kind": "virtual_site"
+            }
+          ]
+        }
+      },
+      "advertise_options": {
+        "advertise_in_cluster": {
+          "port": {
+            "info": {
+              "port": 5432,
+              "protocol": "PROTOCOL_TCP",
+              "same_as_port": {}
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "metadata": {
+    "name": "opswat-md-icap",
+    "namespace": "shared",
+    "description": "NGINX workshop",
+    "labels": {
+      "owner": "{{ extra_owner_email.split('@')[0] }}",
+      "project": "cloudbuilder"
+    },
+    "annotations": {},
+    "disable": false
+  },
+  "spec": {
+    "memory": "2000",
+    "vcpus": 2,
+    "ephemeral_storage": "2000"
+  }
+}

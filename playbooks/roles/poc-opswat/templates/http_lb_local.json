@@ -1,0 +1,92 @@
+{
+  "metadata": {
+    "name": "local",
+    "namespace": "{{ extra_volterra_namespace }}",
+    "labels": {
+      "owner": "{{ extra_owner_email.split('@')[0] }}",
+      "project": "cloudbuilder"
+    },
+    "description": "NGINX workshop",
+    "disable": false
+  },
+  "spec": {
+    "domains": [
+      "{{ extra_fqdn_demo }}"
+    ],
+    "http": {
+      "dns_volterra_managed": false
+    },
+    "downstream_tls_certificate_expiration_timestamps": [],
+    "advertise_custom": {
+      "advertise_where": [
+        {
+          "vk8s_service": {
+            "virtual_site": {
+              "tenant": "{{ extra_volterra.tenant.full }}",
+              "namespace": "{{ extra_volterra_namespace }}",
+              "name": "cloudbuilder-landing-zones",
+              "kind": "virtual_site"
+            }
+          },
+          "port": 80
+        }
+      ]
+    },
+    "default_route_pools": [],
+    "routes": [
+      {
+        "simple_route": {
+          "http_method": "ANY",
+          "path": {
+            "prefix": "/"
+          },
+          "origin_pools": [
+            {
+              "pool": {
+                "tenant": "{{ extra_volterra.tenant.full }}",
+                "namespace": "{{ extra_volterra_namespace }}",
+                "name": "{{ extra_fqdn_demo | replace('.', '-') }}",
+                "kind": "origin_pool"
+              },
+              "weight": 1,
+              "priority": 1,
+              "endpoint_subsets": {}
+            }
+          ],
+          "headers": [
+            {
+              "name": "Host",
+              "exact": "{{ extra_fqdn_demo }}",
+              "invert_match": false
+            }
+          ],
+          "disable_host_rewrite": {}
+        }
+      }
+    ],
+    "disable_waf": {},
+    "add_location": false,
+    "no_challenge": {},
+    "user_id_client_ip": {},
+    "disable_rate_limit": {},
+    "waf_exclusion_rules": [],
+    "data_guard_rules": [],
+    "blocked_clients": [],
+    "trusted_clients": [],
+    "ddos_mitigation_rules": [],
+    "service_policies_from_namespace": {},
+    "round_robin": {},
+    "disable_trust_client_ip_headers": {},
+    "disable_ddos_detection": {},
+    "disable_malicious_user_detection": {},
+    "disable_api_discovery": {},
+    "disable_bot_defense": {},
+    "disable_api_definition": {},
+    "dns_info": [],
+    "state": "VIRTUAL_HOST_READY",
+    "auto_cert_info": {
+      "auto_cert_state": "AutoCertNotApplicable",
+      "dns_records": []
+    }
+  }
+}

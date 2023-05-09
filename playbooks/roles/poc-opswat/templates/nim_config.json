@@ -1,0 +1,12 @@
+"configFiles": {
+    "files": [
+    {
+        "contents": "{{ | b64encode }}",
+        "name": "/etc/nginx/nginx.conf"
+    }
+    ],
+    "rootDir": "/etc/nginx"
+},
+"ignoreConflict": true,
+"validateConfig": true
+}

@@ -1,0 +1,99 @@
+---
+- name: set var NameSpace
+  set_fact:
+    extra_volterra_namespace: "{{ extra_namespace }}"
+    # extra_license_keys_mdicapsrv: "38NF-f8v1-3qaK-pTXw-Fznx-fCpM-dFU6-kBG8"
+    # extra_license_keys_mdcore: "VrGK-tW8z-uzrj-E7pn-xz64-Wz2x-8ix1-GPXM"
+
+- name: MD ICAP Server chart values and "mdicapsrv_env" config map
+  set_fact:
+    chart_values:
+      ## Secret mdicapsrv-cred
+      md_user: admin                         # Initial admin user for the MD ICAP Server web interface
+      md_password: admin                     # Initial admin password for the MD ICAP Server web interface
+      ## Secret md-postgre-cred
+      db_user: postgres                       # Initial admin user for the MD ICAP Server web interface
+      db_password: Ng1nxOpsw4t                # Initial admin password for the MD ICAP Server web interface
+      ## Secret keys
+      md_api_key: "800052791585818289157813215779566536"            # 36 character API key used for the MD ICAP Server REST API, if not set it will be randomly generated
+      md_license_keys:
+        md-icapsrv: "{{ extra_license_keys_mdicapsrv }}"
+        md-core: "{{ extra_license_keys_mdcore }}"
+      activation_server: activation.dl.opswat.com   # URL to the OPSWAT activation server, this value should not be changed
+      # ENVIRONMENT variables
+      MDICAPSRV_REST_PORT: 8048                     # Default REST port for the MD ICAP Server service
+      MDICAPSRV_ICAP_PORT: 1344                     # Default ICAP port for the MD ICAP Server service
+      MDICAPSRV_ICAPS_PORT: 11344                   # Default ICAPS port for the MD ICAP Server service
+      app_name: "{{ extra_namespace }}"             # Application name, it also sets the namespace on all created resources and replaces `<APP_NAME>` in the ingress host (if the ingress is enabled)
+      icap_components:
+        - name: md-icapsrv
+          image: opswat-mdicapsrv                   # Overrides the default docker image for the MD ICAP Server service, this value can be changed if you want to set a different version of MD ICAP Server
+          replicas: 1                               # Sets the number of replicas if you want to have multiple MD ICAP Server instances
+      # ENVIRONMENT variables
+      MDCORE_REST_PORT: "8008"            # Default port for the MD Core service
+      MDCORE_DB_MODE: "4"                 # Database mode
+      MDCORE_DB_TYPE: remote              # Database type
+      MDCORE_DB_HOST: postgre-vm       # Hostname / entrypoint of the database, this value should be changed any if using an external database service
+      MDCORE_DB_PORT: "5432"              # Port for the PostgreSQL Database
+      MDCORE_CERT_PATH: "/cert"
+      core_components:
+        - name: md-core
+          image: opswat/metadefendercore-debian:5.2.1         # Overrides the default docker image for the MD Core service, this value can be changed if you want to set a different version of MD Core
+          replicas: 1                                         # Sets the number of replicas if you want to have multiple MD Core instances
+
+#- name: CREATE config-template.yml >> Secret md-postgres-cred
+#  kubernetes.core.k8s:
+#    definition: "{{ lookup('template', 'Secret__md-postgre-cred.yaml') | from_yaml }}"
+#    kubeconfig: "{{ extra_kubeconfig | from_yaml }}"
+#
+#- name: CREATE config-template.yml >> Secret md-cred
+#  kubernetes.core.k8s:
+#    definition: "{{ lookup('template', 'Secret__md-cred.yaml') | from_yaml }}"
+#    kubeconfig: "{{ extra_kubeconfig | from_yaml }}"
+#
+#- name: CREATE config-template.yml >> Secret md-api-key
+#  kubernetes.core.k8s:
+#    definition: "{{ lookup('template', 'Secret__md-api-key.yaml') | from_yaml }}"
+#    kubeconfig: "{{ extra_kubeconfig | from_yaml }}"
+#
+#- name: CREATE config-template.yml >> Secret md-license-key
+#  kubernetes.core.k8s:
+#    definition: "{{ lookup('template', 'Secret__md-license-key.yaml') | from_yaml }}"
+#    kubeconfig: "{{ extra_kubeconfig | from_yaml }}"
+#  loop: "{{ chart_values.md_license_keys | dict2items }}"
+#
+- name: UPDATE Deployment CORE
+  kubernetes.core.k8s:
+    definition: "{{ lookup('template', 'Deployment__mdcore.yaml') | from_yaml }}"
+    kubeconfig: "{{ extra_kubeconfig | from_yaml }}"
+  loop: "{{ chart_values.core_components }}"
+
+#- name: UPDATE Deployment ICAP
+#  kubernetes.core.k8s:
+#    definition: "{{ lookup('template', 'Deployment__mdicapsrv.yaml') | from_yaml }}"
+#    kubeconfig: "{{ extra_kubeconfig | from_yaml }}"
+#  loop: "{{ chart_values.icap_components }}"
+
+#- name: set variable
+#  set_fact:
+#    var_credential:
+#      username: "{{ extra_nginx_nms.username }}"
+#      password: "{{ extra_nginx_nms.password }}"
+#
+#- name: CREATE Secret NMS
+#  kubernetes.core.k8s:
+#    definition: "{{ lookup('template', 'Secret_nginx_nms.yaml') | from_yaml }}"
+#    kubeconfig: "{{ extra_kubeconfig | from_yaml }}"
+#
+#- name: UPDATE Deployment nginx-agent
+#  kubernetes.core.k8s:
+#    definition: "{{ lookup('template', 'Deployment_nginx_agent.yaml') | from_yaml }}"
+#    kubeconfig: "{{ extra_kubeconfig | from_yaml }}"
+
+
+
+
+
+
+
+...

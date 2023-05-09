@@ -1,0 +1,364 @@
+{
+    "auditlog":
+    {
+        "cleanuprange": 168
+    },
+    "certs":
+    {
+        "certs":
+        []
+    },
+    "email":
+    {
+        "server":
+        {
+            "authmethod": 0,
+            "connectiontype": 0,
+            "password": "",
+            "port": 0,
+            "server": "",
+            "username": ""
+        },
+        "server-decryptKey": "VPLBAXw42c5/xAeGp98Torzsx15XfIab"
+    },
+    "filemod":
+    {
+        "mode": "delete",
+        "settings":
+        {
+            "absolute_path": ""
+        }
+    },
+    "global":
+    {
+        "permissive_parsing": false,
+        "persistent_connections": true
+    },
+    "history":
+    {
+        "cleanuprange": 168
+    },
+    "nginx":
+    {
+        "enabled": true,
+        "port": 8080,
+        "port_s": 8443
+    },
+    "password-policy":
+    {
+        "minimum_password_length": 0,
+        "password_complexity": false,
+        "password_history_range": 0
+    },
+    "schema":
+    {
+        "config":
+        {
+            "policy.rule.rule":
+            {
+                "items":
+                [
+                    {
+                        "active": true,
+                        "description": "",
+                        "id": 1,
+                        "last_modified": 1669025847727,
+                        "mutable": true,
+                        "name": "wf-md-core",
+                        "rule_configs":
+                        {
+                            "advanced.allow_error_overwrite": false,
+                            "advanced.allow_error_overwrite.core_busy": false,
+                            "advanced.allow_error_overwrite.core_file_size_exceeded": false,
+                            "advanced.allow_error_overwrite.core_server_error": false,
+                            "advanced.allow_error_overwrite.multipart_error": false,
+                            "advanced.allow_error_overwrite.scan_timeout": false,
+                            "advanced.decoding_error": "BLOCK",
+                            "advanced.not_supported_encoding": "BLOCK",
+                            "request_filters.client_addresses":
+                            [],
+                            "request_filters.destination_addresses":
+                            [],
+                            "request_filters.headers":
+                            [],
+                            "request_filters.icap_client_addresses":
+                            [],
+                            "scan.allow_scan": true,
+                            "scan.allow_scan.scan_timeout_value": 0,
+                            "scan.allow_scan.target": 1,
+                            "trickling.enable_trickling": false,
+                            "trickling.enable_trickling.additional_drip_delay": 3,
+                            "trickling.enable_trickling.additional_drip_size": 100,
+                            "trickling.enable_trickling.enable_withhold": true,
+                            "trickling.enable_trickling.enable_withhold.size": 1000,
+                            "trickling.enable_trickling.first_drip_delay": 5,
+                            "trickling.enable_trickling.first_drip_size": 100
+                        }
+                    }
+                ],
+                "order":
+                [
+                    1
+                ]
+            }
+        },
+        "config-serial": 1,
+        "schema-version": 8
+    },
+    "servers":
+    [
+        {
+            "data": {},
+            "id": 1,
+            "name": "md-core",
+            "server_preference": "failover",
+            "type": "core",
+            "uri_list":
+            [
+                {
+                    "enabled_local_scan": false,
+                    "enabled_webhook": false,
+                    "rule": "#",
+                    "uri": "http://md-core-rest-8008:80"
+                }
+            ],
+            "used": true
+        }
+    ],
+    "session":
+    {
+        "absoluteSessionTimeout": 0,
+        "allowCrossIpSessions": false,
+        "allowDuplicateSession": true,
+        "sessionTimeout": 300000
+    },
+    "ssl":
+    {
+        "cert": "",
+        "enabled": false
+    },
+    "user-management":
+    {
+        "directories":
+        [
+            {
+                "active": 1,
+                "enabled": true,
+                "id": 1,
+                "lockout_attempts": 3,
+                "lockout_timeout": 5,
+                "name": "LOCAL",
+                "type": "Local"
+            },
+            {
+                "active": 2,
+                "enabled": true,
+                "id": 2,
+                "lockout_attempts": 0,
+                "lockout_timeout": 0,
+                "name": "SYSTEM",
+                "type": "Local"
+            }
+        ],
+        "directory-decryptKey": "VPLBAXw42c5/xAeGp98Torzsx15XfIab",
+        "directory-order":
+        [
+            1,
+            2
+        ],
+        "roles":
+        [
+            {
+                "active": 2,
+                "directory_count": 0,
+                "display_name": "Administrators",
+                "id": 1,
+                "name": "admin",
+                "rights":
+                {
+                    "cert":
+                    [
+                        "read",
+                        "write"
+                    ],
+                    "configlog":
+                    [
+                        "read",
+                        "write"
+                    ],
+                    "global":
+                    [
+                        "read",
+                        "write"
+                    ],
+                    "history":
+                    [
+                        "read",
+                        "write"
+                    ],
+                    "license":
+                    [
+                        "read",
+                        "write"
+                    ],
+                    "maintain":
+                    [
+                        "read",
+                        "write"
+                    ],
+                    "retention":
+                    [
+                        "read",
+                        "write"
+                    ],
+                    "rule":
+                    [
+                        "read",
+                        "write"
+                    ],
+                    "serverprofiles":
+                    [
+                        "read",
+                        "write"
+                    ],
+                    "users":
+                    [
+                        "read",
+                        "write"
+                    ]
+                }
+            },
+            {
+                "active": 1,
+                "directory_count": 0,
+                "display_name": "Security administrators",
+                "id": 2,
+                "name": "security_admin",
+                "rights":
+                {
+                    "cert":
+                    [
+                        "read",
+                        "write"
+                    ],
+                    "global":
+                    [
+                        "read",
+                        "write"
+                    ],
+                    "history":
+                    [
+                        "read",
+                        "write"
+                    ],
+                    "rule":
+                    [
+                        "read",
+                        "write"
+                    ],
+                    "serverprofiles":
+                    [
+                        "read",
+                        "write"
+                    ]
+                }
+            },
+            {
+                "active": 1,
+                "directory_count": 0,
+                "display_name": "Security auditor",
+                "id": 3,
+                "name": "security_auditor",
+                "rights":
+                {
+                    "configlog":
+                    [
+                        "read"
+                    ],
+                    "global":
+                    [
+                        "read"
+                    ],
+                    "history":
+                    [
+                        "read"
+                    ],
+                    "license":
+                    [
+                        "read"
+                    ],
+                    "retention":
+                    [
+                        "read"
+                    ],
+                    "rule":
+                    [
+                        "read"
+                    ],
+                    "serverprofiles":
+                    [
+                        "read"
+                    ],
+                    "users":
+                    [
+                        "read"
+                    ]
+                }
+            },
+            {
+                "active": 1,
+                "directory_count": 0,
+                "display_name": "Help desk",
+                "id": 4,
+                "name": "help_desk",
+                "rights":
+                {
+                    "global":
+                    [
+                        "read"
+                    ],
+                    "history":
+                    [
+                        "read"
+                    ],
+                    "rule":
+                    [
+                        "read"
+                    ],
+                    "serverprofiles":
+                    [
+                        "read"
+                    ]
+                }
+            }
+        ],
+        "users":
+        [
+            {
+                "active": 1,
+                "api_key": "800052791585818289157813215779566536",
+                "directory_id": 1,
+                "display_name": "admin",
+                "email": "admin@local",
+                "id": 2,
+                "name": "admin",
+                "old_passwords":
+                [
+                    {
+                        "password": "f46b03ce64b21fdbd925d01d8bce0df8534e0d137fcff17119e600375fa7b357",
+                        "salt": "0ed86e4a0d2c49c49098dec0c299b169"
+                    }
+                ],
+                "password": "f46b03ce64b21fdbd925d01d8bce0df8534e0d137fcff17119e600375fa7b357",
+                "roles":
+                [
+                    "1"
+                ],
+                "salt": "0ed86e4a0d2c49c49098dec0c299b169",
+                "ui_settings":
+                {}
+            }
+        ]
+    },
+    "version": 5
+}

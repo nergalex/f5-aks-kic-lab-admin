@@ -1,0 +1,5 @@
+{
+  "name": "{{ extra_namespace }}",
+  "displayName": "{{ extra_namespace }}",
+  "description": "N+ OPSWAT module"
+}

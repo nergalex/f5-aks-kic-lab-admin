@@ -1,0 +1,77 @@
+- name: Create Instance Group
+  block:
+
+  - name: GET Instance Group
+    uri:
+      url: "https://{{ extra_nginx_nms.ip }}/api/platform/v1/instance-groups/{{ extra_namespace }}"
+      method: GET
+      return_content: yes
+      validate_certs: no
+      force_basic_auth: yes
+      url_username: "{{ extra_nginx_nms.username }}"
+      url_password: "{{ extra_nginx_nms.password }}"
+      status_code: 200, 404
+    register: var_register
+
+  - name: CREATE Instance Group
+    uri:
+      url: "https://{{ extra_nginx_nms.ip }}/api/platform/v1/instance-groups"
+      method: POST
+      headers:
+        Content-Type: "application/json"
+      body: "{{ lookup('template','nim_instance_group.json') }}"
+      body_format: json
+      return_content: yes
+      validate_certs: no
+      force_basic_auth: yes
+      url_username: "{{ extra_nginx_nms.username }}"
+      url_password: "{{ extra_nginx_nms.password }}"
+      status_code: 201, 202
+    when: var_register.status == 404
+
+  - name: UPDATE Instance Group
+    uri:
+      url: "https://{{ extra_nginx_nms.ip }}/api/platform/v1/instance-groups/{{ extra_namespace }}"
+      method: PUT
+      headers:
+        Content-Type: "application/json"
+      body: "{{ lookup('template','nim_instance_group.json') }}"
+      body_format: json
+      return_content: yes
+      validate_certs: no
+      force_basic_auth: yes
+      url_username: "{{ extra_nginx_nms.username }}"
+      url_password: "{{ extra_nginx_nms.password }}"
+      status_code: 201, 202
+    when: var_register.status == 200
+
+- name: PREPARE config
+  set_fact:
+    extra_config: "{{ lookup('template','nginx_config.conf') }}"
+
+- name: UPDATE Config
+  block:
+
+  - name: UPDATE Instance Group
+    uri:
+      url: "https://{{ extra_nginx_nms.ip }}/api/platform/v1/instance-groups/{{ XXXXXXX instGroupUid }}/config"
+      method: POST
+      headers:
+        Content-Type: "application/json"
+      body: "{{ lookup('template','nim_config.json') }}"
+      body_format: json
+      return_content: yes
+      validate_certs: no
+      force_basic_auth: yes
+      url_username: "{{ extra_nginx_nms.username }}"
+      url_password: "{{ extra_nginx_nms.password }}"
+      status_code: 201, 202
+    when: var_register.status == 404
+
+
+
+
+
+
+
+

@@ -1,0 +1,198 @@
+{
+  "metadata": {
+    "name": "cloudbuilder",
+    "namespace": "{{ extra_volterra_namespace }}",
+    "labels": {
+      "owner": "{{ extra_owner_email.split('@')[0] }}",
+      "project": "cloudbuilder"
+    },
+    "description": "default namespace policy",
+    "disable": false
+  },
+  "spec": {
+    "endpoint": {
+      "any": {}
+    },
+    "rules": {
+      "ingress_rules": [
+        {
+          "metadata": {
+            "name": "allow-pgsql",
+            "description": "nginx devportal to PaaS DB",
+            "disable": false
+          },
+          "action": "ALLOW",
+          "adv_action": {
+            "action": "LOG"
+          },
+          "any": {},
+          "protocol_port_range": {
+            "protocol": "TCP",
+            "port_ranges": [
+              "5432"
+            ]
+          },
+          "keys": [],
+          "label_matcher": {
+            "keys": []
+          }
+        },
+        {
+          "metadata": {
+            "name": "allow-icmp",
+            "description": "",
+            "disable": false
+          },
+          "rule_name": "",
+          "rule_description": "",
+          "action": "ALLOW",
+          "adv_action": {
+            "action": "LOG"
+          },
+          "any": {},
+          "protocol_port_range": {
+            "protocol": "ICMP",
+            "port_ranges": []
+          },
+          "keys": [],
+          "label_matcher": {
+            "keys": []
+          }
+        },
+        {
+          "metadata": {
+            "name": "allow-web",
+            "description": "",
+            "disable": false
+          },
+          "rule_name": "",
+          "rule_description": "",
+          "action": "ALLOW",
+          "adv_action": {
+            "action": "LOG"
+          },
+          "any": {},
+          "applications": {
+            "applications": [
+              "APPLICATION_HTTP",
+              "APPLICATION_HTTPS"
+            ]
+          },
+          "keys": [],
+          "label_matcher": {
+            "keys": []
+          }
+        },
+        {
+          "metadata": {
+            "name": "allow-all",
+            "description": "",
+            "disable": false
+          },
+          "rule_name": "",
+          "rule_description": "",
+          "action": "ALLOW",
+          "adv_action": {
+            "action": "LOG"
+          },
+          "any": {},
+          "all_traffic": {},
+          "keys": [],
+          "label_matcher": {
+            "keys": []
+          }
+        }
+      ],
+      "egress_rules": [
+        {
+          "metadata": {
+            "name": "allow-pgsql",
+            "description": "nginx devportal to PaaS DB",
+            "disable": false
+          },
+          "action": "ALLOW",
+          "adv_action": {
+            "action": "LOG"
+          },
+          "any": {},
+          "protocol_port_range": {
+            "protocol": "TCP",
+            "port_ranges": [
+              "5432"
+            ]
+          },
+          "keys": [],
+          "label_matcher": {
+            "keys": []
+          }
+        },
+        {
+          "metadata": {
+            "name": "allow-icmp",
+            "description": "",
+            "disable": false
+          },
+          "rule_name": "",
+          "rule_description": "",
+          "action": "ALLOW",
+          "adv_action": {
+            "action": "LOG"
+          },
+          "any": {},
+          "protocol_port_range": {
+            "protocol": "ICMP",
+            "port_ranges": []
+          },
+          "keys": [],
+          "label_matcher": {
+            "keys": []
+          }
+        },
+        {
+          "metadata": {
+            "name": "allow-http-dns",
+            "description": "",
+            "disable": false
+          },
+          "rule_name": "",
+          "rule_description": "",
+          "action": "ALLOW",
+          "adv_action": {
+            "action": "LOG"
+          },
+          "any": {},
+          "applications": {
+            "applications": [
+              "APPLICATION_HTTP",
+              "APPLICATION_DNS",
+              "APPLICATION_HTTPS"
+            ]
+          },
+          "keys": [],
+          "label_matcher": {
+            "keys": []
+          }
+        },
+        {
+          "metadata": {
+            "name": "allow-all",
+            "description": "",
+            "disable": false
+          },
+          "rule_name": "",
+          "rule_description": "",
+          "action": "ALLOW",
+          "adv_action": {
+            "action": "LOG"
+          },
+          "any": {},
+          "all_traffic": {},
+          "keys": [],
+          "label_matcher": {
+            "keys": []
+          }
+        }
+      ]
+    }
+  }
+}

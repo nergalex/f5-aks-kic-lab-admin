@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "name": "{{ item.name }}-admin-ui",
+    "namespace": "{{ extra_volterra_namespace }}",
+    "labels": {
+      "owner": "{{ extra_owner_email.split('@')[0] }}",
+      "project": "cloudbuilder"
+    },
+    "description": "NGINX workshop",
+    "disable": false
+  },
+"spec": {
+    "domains": [
+      "{{ item.name }}-admin-ui.com"
+    ],
+    "http": {
+      "dns_volterra_managed": false,
+      "port": 80
+    },
+    "downstream_tls_certificate_expiration_timestamps": [],
+    "advertise_on_public_default_vip": {},
+    "default_route_pools": [
+      {
+        "pool": {
+          "tenant": "{{ extra_volterra.tenant.full }}",
+          "namespace": "{{ extra_volterra_namespace }}",
+          "name": "{{ item.name }}-rest-{{ item.ports.0.port }}",
+          "kind": "origin_pool"
+        },
+        "weight": 1,
+        "priority": 1,
+        "endpoint_subsets": {}
+      }
+    ],
+    "routes": [],
+    "disable_waf": {},
+    "add_location": true,
+    "no_challenge": {},
+    "user_id_client_ip": {},
+    "disable_rate_limit": {},
+    "waf_exclusion_rules": [],
+    "data_guard_rules": [],
+    "blocked_clients": [],
+    "trusted_clients": [],
+    "ddos_mitigation_rules": [],
+    "no_service_policies": {},
+    "round_robin": {},
+    "disable_trust_client_ip_headers": {},
+    "disable_ddos_detection": {},
+    "disable_malicious_user_detection": {},
+    "disable_api_discovery": {},
+    "disable_bot_defense": {},
+    "disable_api_definition": {},
+    "disable_ip_reputation": {},
+    "disable_client_side_defense": {},
+    "graphql_rules": []
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "name": "md-icapsrv-nginx-8080",
+    "namespace": "{{ extra_volterra_namespace }}",
+    "labels": {
+      "owner": "{{ extra_owner_email.split('@')[0] }}",
+      "project": "cloudbuilder"
+    },
+    "description": "NGINX workshop",
+    "disable": false
+  },
+  "spec": {
+    "origin_servers": [
+      {
+        "k8s_service": {
+          "service_name": "md-icapsrv.{{ extra_volterra_namespace }}",
+          "site_locator": {
+            "virtual_site": {
+              "tenant": "{{ extra_volterra.tenant.full }}",
+              "namespace": "{{ extra_volterra_namespace }}",
+              "name": "cloudbuilder-landing-zones"
+            }
+          },
+          "vk8s_networks": {}
+        },
+        "labels": {}
+      }
+    ],
+    "no_tls": {},
+    "port": 8080,
+    "health_check_port": 8048,
+    "healthcheck": [
+      {
+        "tenant": "{{ extra_volterra.tenant.full }}",
+        "namespace": "{{ extra_volterra_namespace }}",
+        "name": "md-liveness-probe"
+      }
+    ],
+    "loadbalancer_algorithm": "LEAST_REQUEST",
+    "endpoint_selection": "LOCAL_PREFERRED"
+  }
+}

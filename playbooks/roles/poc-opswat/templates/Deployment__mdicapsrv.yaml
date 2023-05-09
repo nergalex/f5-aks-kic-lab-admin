@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ item.name }}"
+  namespace: "{{ extra_volterra_namespace }}"
+  labels:
+    owner: "{{ extra_owner_email.split('@')[0] }}"
+    project: cloudbuilder
+  annotations:
+    ves.io/app: malware-analysis
+    ves.io/virtual-sites: "{{ extra_volterra_namespace }}/cloudbuilder-landing-zones"
+    ves.io/workload-flavor-{{ item.name }}: opswat-md-icap
+spec:
+  replicas: {{ item.replicas }}
+  selector:
+    matchLabels:
+      ves.io/workload: "{{ item.name }}"
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+  revisionHistoryLimit: 10
+  progressDeadlineSeconds: 600
+  template:
+    metadata:
+      labels:
+        ves.io/workload: "{{ item.name }}"
+    spec:
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 180
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      schedulerName: default-scheduler
+      volumes:
+        - name: init-config
+          configMap:
+            name: md-icapsrv
+            defaultMode: 420
+      containers:
+        - name: "{{ item.name }}"
+          image: "{{ stats_acr_login_server }}/{{ item.image }}:{{ extra_namespace }}"
+          volumeMounts:
+            - name: init-config
+              readOnly: true
+              mountPath: /opt/opswat/
+          imagePullSecrets:
+            - name: "{{ item.name }}-{{ stats_acr_login_server  | replace('.', '-') }}"
+          env:
+            - name: IMPORT_CONF_FILE
+              value: /opt/opswat/mdicapsrv-config.json
+            - name: IMPORT_CONF_FILE_TARGET
+              value: '["nginx", "schema", "servers"]'
+            - name: REST_PORT
+              value: "{{ chart_values.MDICAPSRV_REST_PORT }}"
+            - name: ICAP_PORT
+              value: "{{ chart_values.MDICAPSRV_ICAP_PORT }}"
+            - name: ICAPS_PORT
+              value: "{{ chart_values.MDICAPSRV_ICAPS_PORT }}"
+            - name: ACTIVATION_SERVER
+              value: "{{ chart_values.activation_server }}"
+            - name: MD_USER
+              valueFrom:
+                secretKeyRef:
+                  name: md-cred
+                  key: user
+            - name: MD_PWD
+              valueFrom:
+                secretKeyRef:
+                  name: md-cred
+                  key: password
+            - name: APIKEY
+              valueFrom:
+                secretKeyRef:
+                  name: md-api-key
+                  key: value
+            - name: LICENSE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ item.name }}-license-key"
+                  key: value
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: Always
+

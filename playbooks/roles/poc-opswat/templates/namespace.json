@@ -1,0 +1,13 @@
+{
+  "metadata": {
+    "name": "{{ extra_volterra_namespace }}",
+    "namespace": "",
+    "description": "NGINX workshop",
+    "labels": {
+      "owner": "{{ extra_owner_email.split('@')[0] }}",
+      "project": "cloudbuilder"
+    },
+    "disable": false
+  },
+  "spec": {}
+}

@@ -1,0 +1,79 @@
+---
+- name: INSTALL package
+  package:
+    name:
+      - python3-pip
+      - git
+
+- name: CREATE cert directory
+  file:
+    path: /etc/ssl/nginx/
+    state: directory
+
+- name: COPY NGINX certificate
+  copy:
+    content: "{{ lookup('file', 'nginx-repo.crt') }}"
+    dest: "/etc/ssl/nginx/nginx-repo.crt"
+    mode: '0400'
+
+- name: COPY NGINX key
+  copy:
+    content: "{{ lookup('file', 'nginx-repo.key') }}"
+    dest: "/etc/ssl/nginx/nginx-repo.key"
+    mode: '0400'
+
+- name: CREATE yum repo directory
+  file:
+    path: /etc/yum.repos.d
+    state: directory
+
+- name: CREATE source image directory
+  file:
+    path: /root/source_images/
+    state: directory
+
+- name: FETCH git repo
+  git:
+    repo: https://github.com/nergalex/docker-nginx-opswat.git
+    dest: /root/source_images/nginx-opswat
+    force: yes
+
+- name: COPY NGINX certificate > build dir
+  copy:
+    content: "{{ lookup('file', 'nginx-repo.crt') }}"
+    dest: /root/source_images/nginx-opswat/debian/nginx-opswat/nginx-repo.crt
+    mode: '0400'
+
+- name: COPY NGINX key > build dir
+  copy:
+    content: "{{ lookup('file', 'nginx-repo.key') }}"
+    dest: /root/source_images/nginx-opswat/debian/nginx-opswat/nginx-repo.key
+    mode: '0400'
+
+- name: COPY OPSWAT RPM > build dir
+  copy:
+    content: "{{ lookup('file', 'nginx-module-ometascan.deb') }}"
+    dest: /root/source_images/nginx-opswat/debian/nginx-opswat/nginx-module-ometascan.deb
+    mode: '0400'
+
+- name: BUILD image
+  shell: "DOCKER_BUILDKIT=1 \
+  docker build \
+  --add-host={{ extra_nginx_nms.fqdn }}:{{ extra_nginx_nms.ip }} \
+  --build-arg CONTROLLER_HOST={{ extra_nginx_nms.fqdn }} \
+  --build-arg INSTANCE_GROUP={{ extra_namespace }} \
+  --tag nginx-opswat:1.0.0 \
+  --secret id=nginx-crt,src=nginx-repo.crt \
+  --secret id=nginx-key,src=nginx-repo.key \
+  ."
+  args:
+    chdir: /root/source_images/nginx-opswat/debian/nginx-opswat/
+
+- name: "Artifact for Tower Workflows"
+  set_stats:
+    data:
+      stats_nginx_image_tag: "1.0.0"
+
+
+
+...

@@ -1,0 +1,23 @@
+---
+- name: pass
+  set_fact:
+    var: pass
+
+- name: COMMON - CREATE PostgreSQL >> User
+  postgresql_query:
+    db: "{{ extra_namespace }}"
+    login_host: nginx-opswat-paasdb.postgres.database.azure.com
+    login_user: cyber@nginx-opswat-paasdb
+    login_password: "{{ extra_nginx_nms.password }}"
+    query: "CREATE USER nginxdm WITH LOGIN PASSWORD 'nginxdm';"
+  ignore_errors: yes
+
+- name: CREATE PostgreSQL >> Grant User
+  postgresql_query:
+    db: "{{ extra_namespace }}"
+    login_host: nginx-opswat-paasdb.postgres.database.azure.com
+    login_user: cyber@nginx-opswat-paasdb
+    login_password: "{{ extra_nginx_nms.password }}"
+    query: 'GRANT ALL PRIVILEGES ON DATABASE "{{ extra_namespace }}" TO nginxdm;'
+
+...
